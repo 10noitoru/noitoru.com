@@ -52,7 +52,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:16px;pa
 .word .L{display:inline-grid;overflow:hidden;padding-top:.06em;margin-top:-.06em}
 .word .L>span{grid-area:1/1;display:block;transition:transform .9s cubic-bezier(.75,0,.15,1),color .5s;will-change:transform}
 .word .L .b{transform:translateY(110%);color:var(--sig)}
-.word.voice .L .a{transform:translateY(-110%)}
+.word.voice .L.swap .a{transform:translateY(-110%)}
 .word.voice .L .b{transform:translateY(0)}
 .word .in{display:inline-block;transform:translateY(105%);animation:rise 1.1s cubic-bezier(.2,.9,.1,1) forwards}
 @keyframes rise{to{transform:none}}
@@ -408,10 +408,10 @@ footer{border-top:1px solid var(--ink);padding:clamp(40px,6vw,72px) var(--gut) 2
   </div>
 
   <div class="word" id="word" aria-hidden="true">
-    <span class="L"><span class="a"><span class="in" style="animation-delay:.05s">N</span></span><span class="b">V</span></span>
+    <span class="L swap"><span class="a"><span class="in" style="animation-delay:.05s">N</span></span><span class="b">V</span></span>
     <span class="L"><span class="a"><span class="in" style="animation-delay:.13s">O</span></span></span>
     <span class="L"><span class="a"><span class="in" style="animation-delay:.21s">I</span></span></span>
-    <span class="L"><span class="a"><span class="in" style="animation-delay:.29s">S</span></span><span class="b">C</span></span>
+    <span class="L swap"><span class="a"><span class="in" style="animation-delay:.29s">S</span></span><span class="b">C</span></span>
     <span class="L"><span class="a"><span class="in" style="animation-delay:.37s">E</span></span></span>
   </div>
 
@@ -646,7 +646,7 @@ footer{border-top:1px solid var(--ink);padding:clamp(40px,6vw,72px) var(--gut) 2
       <li><h3>利用の目的</h3><p>取得した情報は、次の目的にだけ使います。</p><ul><li>お問い合わせへの返信、お見積もり</li><li>音声の処理と納品</li><li>料金の請求と入金の確認</li><li>トラブルへの対応</li></ul></li>
       <li><h3>音声データの扱い</h3><p>お預かりした音声は、作業用のパソコンの中だけで扱い、クラウドの処理サービスや AI のサービスには送りません。作業は当方の作業者1名だけが行います。納品後、依頼者の確認が済んだ時点で削除します。</p></li>
       <li><h3>第三者への提供</h3><p>ご本人の同意なく、個人情報を第三者に提供しません。ただし、法令にもとづく場合を除きます。</p></li>
-      <li><h3>外部サービスの利用</h3><p>当方は、メールの送受信とサイトの運営に、レンタルサーバーの事業者のサービスを使っています。お問い合わせフォームの内容は、フォーム送信サービス（ssgform）を通じてメールで当方に届きます。このサービスは送信内容を保存しない仕組みです。</p></li>
+      <li><h3>外部サービスの利用</h3><p>当方は、メールの送受信とサイトの運営に、レンタルサーバーの事業者のサービスを使っています。お問い合わせフォームの内容は、フォーム送信サービス（ssgform）を通じてメールで当方に届きます。このサービスは送信内容（本文）を保存しない仕組みですが、送信日時・送信元のページ・IPアドレス・ブラウザの種類は記録されます。</p></li>
       <li><h3>安全管理</h3><p>個人情報と音声データがもれたり、なくなったりしないよう、必要な対策をとります。</p></li>
       <li><h3>開示・訂正・削除のご請求</h3><p>ご本人から、ご自身の個人情報の開示・訂正・削除を求められた場合は、ご本人であることを確認したうえで、遅滞なく対応します。</p></li>
       <li><h3>お問い合わせ窓口</h3><p>このポリシーについてのお問い合わせは、当サイトのお問い合わせフォームからお願いします。</p></li>
@@ -716,6 +716,7 @@ footer{border-top:1px solid var(--ink);padding:clamp(40px,6vw,72px) var(--gut) 2
     globalClean = !globalClean; interacted = true;
     sw.setAttribute('aria-pressed', globalClean);
     $('#swl').textContent = globalClean ? 'ノイズを戻す' : 'ノイズを取る';
+    if (RM) frame(performance.now());
   });
 
   /* giant letters: kinetic width + noise jitter */
@@ -779,6 +780,7 @@ footer{border-top:1px solid var(--ink);padding:clamp(40px,6vw,72px) var(--gut) 2
       x: rnd(0, W), y: rnd(0, H), k: Math.random() < .5 ? 'dot' : Math.random() < .5 ? 'plus' : 'dash',
       s: rnd(1.5, 4.5), a: rnd(.25, .7), c: 0
     }));
+    if (RM) frame(performance.now());
   }
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 120); });
 
@@ -811,15 +813,15 @@ footer{border-top:1px solid var(--ink);padding:clamp(40px,6vw,72px) var(--gut) 2
 
   let introT = null;
   function frame(now) {
-    const t = now / 1000;
+    const t = RM ? 0 : now / 1000;
     if (introT === null) introT = now;
     const since = (now - introT) / 1000;
-    const demo = !interacted && since > 2.2 && since < 4.6;   // 最初に一度だけ整って見せる
+    const demo = !RM && !interacted && since > 2.2 && since < 4.6;   // 最初に一度だけ整って見せる
     const idle = !inHero || now - moved > 3000;
-    level = lerp(level, globalClean || demo ? 1 : 0, .045);
+    level = RM ? Number(globalClean) : lerp(level, globalClean || demo ? 1 : 0, .045);
 
     cx.clearRect(0, 0, W, H);
-    const scanX = idle && !globalClean ? ((Math.sin(t * .5) + 1) / 2) * W : null;
+    const scanX = !RM && idle && !globalClean ? ((Math.sin(t * .5) + 1) / 2) * W : null;
     const px = scanX ?? mx, rad = scanX !== null ? 110 : 170;
     const yNear = scanX !== null ? 1 : Math.max(0, 1 - Math.abs(my - B.y) / (B.h * 1.6 + 120));
 
@@ -828,7 +830,7 @@ footer{border-top:1px solid var(--ink);padding:clamp(40px,6vw,72px) var(--gut) 2
 
     // dust
     for (const d of dust) {
-      const near = Math.max(0, 1 - Math.hypot(d.x - mx, d.y - my) / (rad * 1.2));
+      const near = RM ? 0 : Math.max(0, 1 - Math.hypot(d.x - mx, d.y - my) / (rad * 1.2));
       const hit = scanX !== null ? Math.max(0, 1 - Math.abs(d.x - scanX) / rad) : near;
       d.c = Math.max(d.c * .985, hit);
       const inBand = Math.abs(d.y - B.y) < B.h * .6 ? 1 : .18;
@@ -855,9 +857,9 @@ footer{border-top:1px solid var(--ink);padding:clamp(40px,6vw,72px) var(--gut) 2
     // signal shapes
     let sum = 0;
     sig.forEach((p, i) => {
-      const hit = Math.max(0, 1 - Math.abs(p.tx - px) / rad) * yNear;
+      const hit = RM ? 0 : Math.max(0, 1 - Math.abs(p.tx - px) / rad) * yNear;
       p.local = Math.max(p.local * .988, hit);
-      p.m = lerp(p.m, Math.max(p.local, level), .14);
+      p.m = RM ? level : lerp(p.m, Math.max(p.local, level), .14);
       sum += p.m;
       const e = ease(Math.min(1, p.m));
       p.x += p.vx + rnd(-.6, .6) * (1 - e); p.y += p.vy + rnd(-.6, .6) * (1 - e); p.r += p.vr * (1 - e) * 2;
@@ -883,13 +885,14 @@ footer{border-top:1px solid var(--ink);padding:clamp(40px,6vw,72px) var(--gut) 2
     }
 
     const avg = sum / sig.length;
-    if (avg > .45) setVoice(true); else if (avg < .25) setVoice(false);
-    typeFrame(); squigFrame(t);
+    if (RM) setVoice(globalClean);
+    else if (avg > .45) setVoice(true); else if (avg < .25) setVoice(false);
+    if (!RM) typeFrame();
+    squigFrame(t);
     if (!RM) requestAnimationFrame(frame);
   }
   build();
-  if (RM) { level = 1; setVoice(true); }
-  document.fonts.ready.then(() => { build(); requestAnimationFrame(frame); });
+  document.fonts.ready.then(() => { build(); if (!RM) requestAnimationFrame(frame); });
 })();
 </script>
 <script>
@@ -1068,16 +1071,20 @@ footer{border-top:1px solid var(--ink);padding:clamp(40px,6vw,72px) var(--gut) 2
   function go(id, push) {
     const { v, el } = target(id);
     if (push) { try { history.pushState(null, '', '#' + (id || 'top')); } catch (e) {} }
+    if (busy) { pending = { v, el }; return; }
     if (v === cur) { if (el && el !== views.find(x => x.dataset.view === v)) el.scrollIntoView({ behavior: RM ? 'auto' : 'smooth' }); else scrollTo({ top: 0, behavior: RM ? 'auto' : 'smooth' }); return; }
     if (RM) return apply(v, el);
     pending = { v, el };            // 切り替え中に押されたら、最後に押したページだけを出す
-    if (busy) return;
     busy = true;
     wipe.classList.remove('out'); wipe.classList.add('on');
     setTimeout(() => {
       apply(pending.v, pending.el); pending = null;
       wipe.classList.add('out');
-      setTimeout(() => { wipe.classList.remove('on', 'out'); busy = false; }, 820);
+      setTimeout(() => {
+        // ワイプの後半に選び直されたページも、最後の操作に合わせる。
+        if (pending) { apply(pending.v, pending.el); pending = null; }
+        wipe.classList.remove('on', 'out'); busy = false;
+      }, 820);
     }, 820);
   }
   function openMenu(open) {
