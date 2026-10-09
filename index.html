@@ -1,0 +1,1124 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ノイトル｜聞き取れない録音を、聞き取れる音声に</title>
+<meta name="description" content="雑音・小さな声・こもった声。証拠や記録の録音を、聞き取りやすく整えます。原本はそのまま、作業後はデータを削除。20秒の無料お試しあり。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500&family=M+PLUS+1:wght@400..900&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js')</script>
+<style>
+:root{
+  --paper:#f3f1ec; --ink:#121212; --gray:#9b9890; --rule:rgba(18,18,18,.12);
+  --sig:#2f45ff; --rec:#ff3d1f;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  --disp:"Archivo",sans-serif;
+  --jp:"M PLUS 1",system-ui,sans-serif;
+  --gut:clamp(16px,3.2vw,48px);
+}
+.sw:focus-visible,.badge:focus-visible,nav a:focus-visible{outline:2px solid var(--sig);outline-offset:3px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--jp);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+.hero{position:relative;min-height:100svh;display:grid;grid-template-rows:auto auto auto minmax(150px,1fr) auto;overflow:hidden;isolation:isolate}
+#fx{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+.grid{position:absolute;inset:0;z-index:-2;pointer-events:none;display:grid;grid-template-columns:repeat(12,1fr);padding:0 var(--gut)}
+.grid i{border-left:1px solid var(--rule);opacity:.5}
+.grid i:last-child{border-right:1px solid var(--rule)}
+
+/* header */
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px var(--gut)}
+.logo{display:flex;align-items:baseline;gap:10px}
+.logo b{font-family:var(--disp);font-weight:900;font-variation-settings:"wdth" 120;font-size:24px;letter-spacing:.02em}
+.logo small{font-size:12px;font-weight:700;letter-spacing:.24em;color:var(--gray)}
+.topbar nav{display:flex;gap:clamp(18px,2.4vw,36px);font-size:clamp(14px,1.15vw,17px);font-weight:900}
+.topbar nav a{position:relative;overflow:hidden;display:inline-block;height:1.4em;line-height:1.4em}
+.topbar nav a span{display:block;transition:transform .45s cubic-bezier(.7,0,.2,1)}
+.topbar nav a span+span,.topbar nav a.on span{color:var(--sig)}
+.topbar nav a:hover span{transform:translateY(-100%)}
+.rec{display:flex;align-items:center;gap:8px;font:500 11px var(--mono);letter-spacing:.08em;font-variant-numeric:tabular-nums}
+.rec i{width:8px;height:8px;border-radius:50%;background:var(--rec);animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.15}}
+
+.meta{display:flex;justify-content:space-between;gap:12px;padding:8px var(--gut);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);font:500 10.5px var(--mono);letter-spacing:.1em;color:#5e5c57;text-transform:uppercase}
+.meta span:nth-child(2) b{color:var(--sig);font-weight:500}
+
+/* giant word */
+.word{font-family:var(--disp);font-weight:900;font-size:min(23vw,36vh);line-height:.8;letter-spacing:-.02em;padding:min(2.4vw,24px) var(--gut) 0;display:flex;justify-content:space-between;user-select:none;white-space:nowrap}
+.word .L{display:inline-grid;overflow:hidden;padding-top:.06em;margin-top:-.06em}
+.word .L>span{grid-area:1/1;display:block;transition:transform .9s cubic-bezier(.75,0,.15,1),color .5s;will-change:transform}
+.word .L .b{transform:translateY(110%);color:var(--sig)}
+.word.voice .L .a{transform:translateY(-110%)}
+.word.voice .L .b{transform:translateY(0)}
+.word .in{display:inline-block;transform:translateY(105%);animation:rise 1.1s cubic-bezier(.2,.9,.1,1) forwards}
+@keyframes rise{to{transform:none}}
+
+.band{position:relative}
+.band .lab{position:absolute;top:50%;transform:translateY(-50%);font:500 10.5px var(--mono);letter-spacing:.1em;color:#5e5c57;display:flex;flex-direction:column;gap:4px}
+.band .lab b{font-family:var(--jp);font-size:12px;letter-spacing:.06em;color:var(--ink)}
+.band .l{left:var(--gut)} .band .r{right:var(--gut);text-align:right}
+.hint{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);font:500 10.5px var(--mono);letter-spacing:.2em;color:#5e5c57;display:flex;gap:10px;align-items:center;transition:opacity .6s;white-space:nowrap}
+.hint i{width:18px;height:1px;background:currentColor}
+
+/* bottom copy */
+.copy{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) auto;gap:clamp(20px,4vw,64px);align-items:end;padding:8px var(--gut) clamp(18px,3vh,32px)}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.14em;color:var(--sig);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:22px;height:1px;background:currentColor}
+h1{font-weight:900;font-size:clamp(28px,3.7vw,56px);line-height:1.22;letter-spacing:-.01em;word-break:auto-phrase;line-break:strict}
+h1 .ln{display:block;overflow:hidden;padding-bottom:.18em;margin-bottom:-.18em}
+h1 .ln>span{display:block;transform:translateY(110%);animation:rise 1s cubic-bezier(.2,.9,.1,1) forwards}
+h1 .mk{position:relative;color:var(--sig);white-space:nowrap}
+h1 .mk svg{position:absolute;left:0;right:0;bottom:-.14em;width:100%;height:.3em;overflow:visible}
+h1 .mk path{fill:none;stroke:var(--sig);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.lead{font-size:clamp(14px,1.05vw,15.5px);line-height:1.95;font-weight:700;color:#2b2a27;max-width:30em}
+.facts{list-style:none;margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;font-size:12.5px;font-weight:800}
+.facts li{display:flex;gap:8px;align-items:baseline;border-top:1px solid var(--rule);padding-top:6px}
+.facts li::before{content:attr(data-n);font:500 10px var(--mono);color:var(--gray)}
+.facts em{font-style:normal;color:var(--sig)}
+
+.ctl{display:flex;flex-direction:column;align-items:center;gap:14px}
+.badge{position:relative;width:clamp(120px,11vw,156px);aspect-ratio:1;display:grid;place-items:center;border-radius:50%;background:var(--ink);color:var(--paper);transition:transform .5s cubic-bezier(.3,1.6,.5,1),background .3s}
+.badge svg{position:absolute;inset:0;width:100%;height:100%;animation:spin 14s linear infinite}
+.badge text{font:500 8.6px var(--mono);letter-spacing:.2em;fill:var(--paper);text-transform:uppercase}
+.badge .c{display:flex;flex-direction:column;align-items:center;line-height:1}
+.badge .c b{font-family:var(--disp);font-weight:900;font-variation-settings:"wdth" 130;font-size:clamp(26px,2.4vw,34px)}
+.badge .c small{font-size:11px;font-weight:700;margin-top:4px}
+.badge:hover{background:var(--sig);transform:scale(1.06) rotate(-6deg)}
+.badge:hover svg{animation-duration:4s}
+@keyframes spin{to{rotate:360deg}}
+
+.sw{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:700}
+.sw .t{position:relative;width:52px;height:26px;border-radius:99px;border:1.5px solid var(--ink);transition:background .35s}
+.sw .k{position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:var(--ink);transition:transform .5s cubic-bezier(.3,1.6,.5,1),background .3s}
+.sw[aria-pressed="true"] .t{background:var(--sig);border-color:var(--sig)}
+.sw[aria-pressed="true"] .k{transform:translateX(26px);background:var(--paper)}
+
+
+/* cursor */
+.cur{position:fixed;left:0;top:0;z-index:60;pointer-events:none;mix-blend-mode:difference;opacity:0;transition:opacity .3s}
+.cur.on{opacity:1}
+.cur .d{position:absolute;width:8px;height:8px;margin:-4px;border-radius:50%;background:#fff}
+.cur .o{position:absolute;width:150px;height:150px;margin:-75px;border-radius:50%;border:1px solid #fff;transition:width .35s,height .35s,margin .35s}
+.cur .o::after{content:"CLEAN";position:absolute;top:-16px;left:50%;transform:translateX(-50%);font:500 9px var(--mono);letter-spacing:.3em;color:#fff}
+.cur.small .o{width:44px;height:44px;margin:-22px}
+.cur.small .o::after{opacity:0}
+
+/* ---------- bar / menu / views ---------- */
+[hidden]{display:none!important}
+[id]{scroll-margin-top:88px}
+header.topbar{position:fixed;top:0;left:0;right:0;z-index:95;padding:calc(18px + env(safe-area-inset-top,0px)) var(--gut) 18px;background:rgba(243,241,236,.88);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--rule);transition:background .4s,color .4s,border-color .4s}
+.hd-space{height:74px}
+.menubtn{display:none;align-items:center;gap:12px;font:500 14px var(--mono);letter-spacing:.16em;padding:10px 18px;margin-right:-6px;border:1.5px solid currentColor;border-radius:99px}
+.menubtn i{display:grid;gap:6px;width:26px}
+.menubtn i::before,.menubtn i::after{content:"";display:block;height:2.5px;background:currentColor;transition:transform .4s}
+.menu-open .menubtn i::before{transform:translateY(4.25px) rotate(45deg)}
+.menu-open .menubtn i::after{transform:translateY(-4.25px) rotate(-45deg)}
+.menu-open header.topbar{background:transparent;color:var(--paper);border-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+.menubtn:focus-visible,.menu a:focus-visible,.nextv:focus-visible{outline:2px solid var(--sig);outline-offset:3px}
+.menu{position:fixed;inset:0;z-index:90;background:var(--ink);color:var(--paper);overflow:auto;clip-path:circle(0% at calc(100% - 44px) 34px);transition:clip-path .75s cubic-bezier(.7,0,.2,1)}
+.menu.open{clip-path:circle(160% at calc(100% - 44px) 34px)}
+.menu-in{min-height:100%;padding:calc(88px + env(safe-area-inset-top,0px)) var(--gut) 40px;display:grid;align-content:start;gap:28px}
+.menu .fig{color:#a9a69e;margin:0}
+.menu nav{display:grid}
+.menu nav a{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:14px 0;border-bottom:1px solid rgba(243,241,236,.15);opacity:0;transform:translateY(28px);transition:opacity .5s,transform .7s cubic-bezier(.2,.9,.1,1);transition-delay:0s}
+.menu.open nav a{opacity:1;transform:none;transition-delay:calc(.18s + var(--i) * .05s)}
+.menu nav a b{font-family:var(--disp);font-weight:900;font-variation-settings:"wdth" 72;font-size:clamp(48px,12vw,110px);line-height:.9;text-transform:uppercase;transition:font-variation-settings .45s,color .3s}
+.menu nav a:hover b{font-variation-settings:"wdth" 125;color:#8f9bff}
+.menu nav a.on b{color:#8f9bff}
+.menu nav a span{font-weight:900;font-size:clamp(14px,1.4vw,18px);color:#a9a69e;text-align:right}
+.menu-cta{justify-self:start;display:inline-flex;gap:12px;padding:16px 24px;border-radius:99px;background:var(--sig);color:#fff;font-weight:900}
+.wipe{position:fixed;inset:-2px;z-index:99;pointer-events:none;display:grid;grid-template-columns:repeat(12,1fr)}
+.wipe i{background:var(--sig);transform:scaleY(0);transform-origin:bottom}
+.wipe i:nth-child(3n){background:var(--ink)}
+.wipe.on i{animation:wIn .42s cubic-bezier(.7,0,.3,1) forwards;animation-delay:calc(var(--i) * .03s)}
+.wipe.on.out i{transform-origin:top;animation-name:wOut}
+@keyframes wIn{from{transform:scale(1.08,0)}to{transform:scale(1.08,1)}}
+@keyframes wOut{from{transform:scale(1.08,1)}to{transform:scale(1.08,0)}}
+.nextv{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:clamp(28px,4vw,52px) var(--gut);border-top:1px solid var(--ink);transition:background .4s,color .4s}
+.nextv small{display:block;font:500 11px var(--mono);letter-spacing:.14em;color:#5e5c57;margin-bottom:8px}
+.nextv b{display:block;font-family:var(--disp);font-weight:900;font-variation-settings:"wdth" 72;font-size:clamp(40px,8vw,108px);line-height:.88;text-transform:uppercase;transition:font-variation-settings .5s}
+.nextv .jp{display:block;font-weight:900;font-size:clamp(14px,1.3vw,18px);margin-top:8px}
+.nextv .arr{font-family:var(--disp);font-weight:900;font-size:clamp(40px,7vw,96px);transition:transform .45s cubic-bezier(.3,1.6,.5,1)}
+.nextv:hover{background:var(--ink);color:var(--paper)}
+.nextv:hover b{font-variation-settings:"wdth" 125}
+.nextv:hover small{color:#a9a69e}
+.nextv:hover .arr{transform:translateX(12px)}
+.case canvas{touch-action:pan-y}
+
+/* ---------- legal ---------- */
+.doc{max-width:48em}
+.arts{list-style:none;counter-reset:a}
+.arts>li{counter-increment:a;display:grid;grid-template-columns:5em minmax(0,1fr);column-gap:24px;padding:22px 0;border-top:1px solid var(--rule)}
+.arts>li::before{content:"第" counter(a) "条";grid-column:1;grid-row:1/span 9;font:500 11px var(--mono);letter-spacing:.06em;color:var(--sig);padding-top:5px}
+.arts>li>*{grid-column:2}
+.arts h3{font-size:17px;font-weight:900;margin-bottom:8px}
+.arts p,.arts li li{font-size:14px;line-height:1.95;font-weight:700;color:#3a3936}
+.arts p+p,.arts ul+p{margin-top:8px}
+.arts ul{margin:4px 0 4px 1.2em}
+.spec>div{display:grid;grid-template-columns:12em minmax(0,1fr);gap:16px;padding:18px 0;border-top:1px solid var(--rule)}
+.spec dt{font-weight:900;font-size:14px}
+.spec dd{font-size:14px;line-height:1.9;font-weight:700;color:#3a3936}
+.todo{display:inline-block;margin:0 4px;padding:1px 8px;border-radius:99px;background:#ffe14d;color:var(--ink);font:500 10.5px var(--mono);letter-spacing:.02em;vertical-align:middle}
+.dated{margin-top:28px;font:500 11px var(--mono);color:#5e5c57}
+@media (max-width:860px){.arts>li{grid-template-columns:1fr}.arts>li::before{grid-row:auto;padding:0 0 6px}.arts>li>*{grid-column:1}.spec>div{grid-template-columns:1fr;gap:6px}}
+
+/* ---------- sections ---------- */
+.progress{position:fixed;left:0;top:0;height:2px;width:100%;background:var(--sig);transform-origin:left;transform:scaleX(0);z-index:96;pointer-events:none}
+.sec{position:relative;padding:clamp(72px,11vw,150px) var(--gut);border-top:1px solid var(--ink)}
+.sec-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:clamp(16px,4vw,64px);align-items:end;margin-bottom:clamp(36px,6vw,80px)}
+.fig{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#5e5c57;display:flex;gap:10px;align-items:center;margin-bottom:14px}
+.fig b{color:var(--sig);font-weight:500}
+.sec h2{font-weight:900;font-size:clamp(30px,5.2vw,76px);line-height:1.12;letter-spacing:-.02em;text-wrap:balance;word-break:auto-phrase}
+.sec h2 .en{display:block;font-family:var(--disp);font-variation-settings:"wdth" 72;font-weight:900;font-size:.62em;letter-spacing:0;color:var(--sig);margin-bottom:.15em;text-transform:uppercase}
+.sec-head p{font-size:clamp(14px,1.1vw,16px);line-height:1.95;font-weight:700;color:#2b2a27;max-width:34em}
+
+/* reveal */
+.js .rv{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
+.js .rv.in{opacity:1;transform:none}
+.js .rv.d1{transition-delay:.08s}.js .rv.d2{transition-delay:.16s}.js .rv.d3{transition-delay:.24s}.js .rv.d4{transition-delay:.32s}.js .rv.d5{transition-delay:.4s}
+
+/* cases */
+.cases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-left:1px solid var(--rule);border-top:1px solid var(--rule)}
+.case{position:relative;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:22px 22px 24px;display:grid;gap:14px;cursor:default;transition:background .4s}
+.case:hover{background:#fff}
+.case canvas{width:100%;height:112px;display:block;cursor:ew-resize}
+.case .no{font:500 10.5px var(--mono);letter-spacing:.12em;color:#5e5c57;display:flex;justify-content:space-between}
+.case .no b{font-weight:500;color:var(--gray);transition:color .3s}
+.case.clean .no b{color:var(--sig)}
+.case h3{font-size:clamp(17px,1.5vw,21px);font-weight:900}
+.case p{font-size:13.5px;line-height:1.85;font-weight:700;color:#4a4843}
+
+.dodont{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,4vw,64px);margin-top:clamp(48px,7vw,96px)}
+.dodont h3{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;padding-bottom:12px;border-bottom:2px solid var(--ink);display:flex;justify-content:space-between}
+.dodont ul{list-style:none}
+.dodont li{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:16px 0;border-bottom:1px solid var(--rule);font-size:clamp(16px,1.5vw,20px);font-weight:900}
+.dodont li small{font-size:12px;font-weight:700;color:#5e5c57;text-align:right}
+.do li::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:var(--sig);margin-right:-4px;align-self:center}
+.dont li span{position:relative;color:#5e5c57}
+.dont li span::after{content:"";position:absolute;left:-2px;right:-2px;top:52%;height:2px;background:var(--rec);transform:scaleX(0);transform-origin:left;transition:transform .7s cubic-bezier(.7,0,.2,1)}
+.dont.in li span::after{transform:scaleX(1)}
+.dont.in li:nth-child(2) span::after{transition-delay:.12s}.dont.in li:nth-child(3) span::after{transition-delay:.24s}.dont.in li:nth-child(4) span::after{transition-delay:.36s}
+.do li span,.dont li span{display:flex;align-items:center;gap:12px}
+
+/* price */
+.meter{border-top:2px solid var(--ink)}
+.row{display:grid;grid-template-columns:minmax(80px,140px) minmax(0,1fr) auto;gap:clamp(12px,3vw,40px);align-items:center;padding:clamp(18px,2.4vw,28px) 0;border-bottom:1px solid var(--rule)}
+.row .len{font-weight:900;font-size:clamp(15px,1.4vw,19px)}
+.row .len small{display:block;font:500 10px var(--mono);letter-spacing:.1em;color:#5e5c57;margin-top:4px}
+.bar{position:relative;height:clamp(14px,1.6vw,20px);background:repeating-linear-gradient(90deg,var(--rule) 0 1px,transparent 1px calc(100% / 12))}
+.bar i{position:absolute;inset:0 auto 0 0;width:var(--w);background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform 1.2s cubic-bezier(.7,0,.2,1)}
+.bar i::after{content:"";position:absolute;right:0;top:-6px;bottom:-6px;width:2px;background:var(--sig)}
+.row.over .bar i{background:repeating-linear-gradient(90deg,var(--ink) 0 8px,transparent 8px 12px)}
+.meter.in .bar i{transform:scaleX(1)}
+.meter.in .row:nth-child(2) .bar i{transition-delay:.12s}.meter.in .row:nth-child(3) .bar i{transition-delay:.24s}.meter.in .row:nth-child(4) .bar i{transition-delay:.36s}
+.yen{font-family:var(--disp);font-variation-settings:"wdth" 80;font-weight:900;font-size:clamp(30px,4.4vw,64px);letter-spacing:-.01em;line-height:1;font-variant-numeric:tabular-nums;text-align:right;min-width:4.4ch}
+.yen small{font-size:.32em;font-family:var(--jp);font-weight:700;margin-left:4px}
+.scale{display:flex;justify-content:space-between;font:500 10px var(--mono);color:#5e5c57;padding:8px 0 0;margin-left:calc(clamp(80px,10vw,140px) + clamp(12px,3vw,40px));margin-right:calc(4.4ch + clamp(12px,3vw,40px))}
+.opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:clamp(36px,5vw,64px)}
+.opt{background:var(--paper);padding:22px;display:grid;gap:8px;align-content:start}
+.opt .k{font:500 10.5px var(--mono);letter-spacing:.12em;color:var(--sig);text-transform:uppercase}
+.opt b{font-size:18px;font-weight:900}
+.opt b em{font-style:normal;color:var(--sig)}
+.opt p{font-size:13px;line-height:1.8;font-weight:700;color:#4a4843}
+
+/* trial */
+.trial{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(28px,6vw,96px);align-items:center;background:var(--ink);color:var(--paper);border-top:0}
+.trial .fig{color:#a9a69e}
+.trial h2 .en{color:#8f9bff}
+.trial .sec-head{margin:0;grid-template-columns:1fr}
+.trial .sec-head p{color:#d9d5cc}
+.dial{position:relative;width:clamp(220px,30vw,400px);aspect-ratio:1;max-width:100%}
+.dial svg{width:100%;height:100%;overflow:visible}
+.dial .trk{fill:none;stroke:rgba(243,241,236,.15);stroke-width:1}
+.dial .tk{stroke:rgba(243,241,236,.4);stroke-width:1}
+.dial .arc{fill:none;stroke:var(--sig);stroke-width:6;stroke-linecap:round}
+.dial .num{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.dial .num b{display:block;font-family:var(--disp);font-variation-settings:"wdth" 72;font-weight:900;font-size:clamp(80px,11vw,160px);line-height:.85;font-variant-numeric:tabular-nums}
+.dial .num small{font:500 11px var(--mono);letter-spacing:.2em;color:#a9a69e}
+.trial .cta2{display:inline-flex;align-items:center;gap:12px;margin-top:28px;padding:16px 24px;border-radius:99px;background:var(--paper);color:var(--ink);font-weight:900;transition:background .3s,color .3s,transform .4s cubic-bezier(.3,1.6,.5,1)}
+.trial .cta2:hover{background:var(--sig);color:var(--paper);transform:translateY(-2px)}
+.trial .cta2:focus-visible{outline:2px solid var(--paper);outline-offset:3px}
+
+/* flow */
+.flow{list-style:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));position:relative}
+.flow::before{content:"";position:absolute;left:0;right:0;top:15px;height:2px;background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform 1.8s cubic-bezier(.7,0,.2,1)}
+.flow.in::before{transform:scaleX(1)}
+.flow li{position:relative;padding:44px 16px 0 0;display:grid;gap:10px;align-content:start}
+.flow li::before{content:"";position:absolute;left:0;top:8px;width:16px;height:16px;border-radius:50%;background:var(--paper);border:2px solid var(--ink);transform:scale(0);transition:transform .5s cubic-bezier(.3,1.8,.5,1),background .3s}
+.flow.in li::before{transform:scale(1)}
+.flow li:last-child::before{background:var(--sig);border-color:var(--sig)}
+.flow .n{font:500 10.5px var(--mono);letter-spacing:.12em;color:#5e5c57}
+.flow h3{font-size:clamp(15px,1.3vw,18px);font-weight:900;line-height:1.4}
+.flow p{font-size:13px;line-height:1.8;font-weight:700;color:#4a4843}
+.flow .tag{justify-self:start;font:500 10px var(--mono);letter-spacing:.06em;padding:3px 8px;border:1px solid var(--sig);color:var(--sig);border-radius:99px}
+
+/* privacy */
+.vault{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,5vw,72px);align-items:start}
+.files{display:grid;gap:14px}
+.file{border:1.5px solid var(--ink);padding:18px 20px;display:grid;gap:8px;background:#fff;position:relative}
+.file .top{display:flex;justify-content:space-between;font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.file .top b{font-weight:500;color:var(--sig)}
+.file .name{font-weight:900;font-size:16px}
+.file .hash{font:400 11.5px/1.6 var(--mono);color:#4a4843;word-break:break-all;font-variant-numeric:tabular-nums}
+.file .hash i{font-style:normal;color:var(--sig)}
+.file.copy{border-style:dashed;background:transparent}
+.file .lock{position:absolute;right:16px;bottom:14px;font:500 10px var(--mono);letter-spacing:.12em;color:var(--sig)}
+.promises{list-style:none;counter-reset:p}
+.promises li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;padding:18px 0;border-bottom:1px solid var(--rule)}
+.promises li:first-child{border-top:2px solid var(--ink)}
+.promises li::before{content:"";width:12px;height:12px;margin-top:6px;background:var(--sig)}
+.promises li:nth-child(2n)::before{border-radius:50%}
+.promises li:nth-child(3n)::before{background:none;border:2px solid var(--ink)}
+.promises b{display:block;font-size:clamp(16px,1.4vw,19px);font-weight:900;margin-bottom:4px}
+.promises span{font-size:13.5px;line-height:1.8;font-weight:700;color:#4a4843}
+
+/* faq */
+.faq{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2.2fr);gap:clamp(20px,4vw,64px);padding:clamp(20px,2.4vw,32px) 0;border-top:2px solid var(--ink)}
+.faq h3{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--sig)}
+.faq h3 span{display:block;font:900 clamp(18px,1.6vw,22px) var(--jp);letter-spacing:0;color:var(--ink);margin-top:6px;text-transform:none}
+details{border-bottom:1px solid var(--rule)}
+details:first-of-type{border-top:1px solid var(--rule)}
+summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) 28px;gap:16px;align-items:center;padding:18px 0;font-size:clamp(15px,1.25vw,17px);font-weight:900}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";width:28px;height:28px;border-radius:50%;border:1.5px solid var(--ink);background:linear-gradient(var(--ink),var(--ink)) center/10px 1.5px no-repeat,linear-gradient(var(--ink),var(--ink)) center/1.5px 10px no-repeat;transition:transform .4s cubic-bezier(.3,1.6,.5,1),background-color .3s}
+details[open] summary::after{transform:rotate(45deg);background-color:var(--sig);border-color:var(--sig);background-image:linear-gradient(#fff,#fff),linear-gradient(#fff,#fff)}
+summary:hover{color:var(--sig)}
+summary:focus-visible{outline:2px solid var(--sig);outline-offset:2px}
+details .a{padding:0 44px 22px 0;font-size:14px;line-height:1.95;font-weight:700;color:#3a3936}
+details[open] .a{animation:fade .5s ease}
+@keyframes fade{from{opacity:0;transform:translateY(-6px)}}
+.refuse{list-style:none;display:flex;flex-wrap:wrap;gap:8px;padding:18px 0}
+.refuse li{font-size:13px;font-weight:800;padding:8px 14px;border:1.5px solid var(--ink);border-radius:99px}
+.refuse li.ok{border-color:var(--sig);color:var(--sig)}
+
+/* contact */
+.contact{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:clamp(24px,5vw,80px);align-items:start}
+.contact .sec-head{grid-template-columns:1fr;margin:0}
+form{display:grid;gap:18px}
+.fld{display:grid;gap:8px}
+.fld label,.fld legend{font-size:13px;font-weight:900;display:flex;gap:8px;align-items:center}
+.fld label em,.fld legend em{font:500 10px var(--mono);font-style:normal;letter-spacing:.08em;color:var(--sig)}
+.fld input,.fld select,.fld textarea{width:100%;font:700 15px var(--jp);color:var(--ink);background:transparent;border:0;border-bottom:1.5px solid var(--ink);padding:10px 0;border-radius:0;transition:border-color .3s,background .3s}
+.fld textarea{min-height:120px;resize:vertical;border:1.5px solid var(--ink);padding:12px}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--sig);background:rgba(47,69,255,.04)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.chk{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;font-weight:700;line-height:1.7;cursor:pointer}
+.chk input{appearance:none;flex:none;width:20px;height:20px;border:1.5px solid var(--ink);margin-top:2px;display:grid;place-items:center;cursor:pointer;transition:background .2s}
+.chk input:checked{background:var(--sig);border-color:var(--sig)}
+.chk input:checked::after{content:"";width:6px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.chk input:focus-visible{outline:2px solid var(--sig);outline-offset:2px}
+.send{justify-self:start;display:inline-flex;align-items:center;gap:14px;padding:18px 28px;border-radius:99px;background:var(--ink);color:var(--paper);font-weight:900;font-size:16px;transition:background .3s,transform .4s cubic-bezier(.3,1.6,.5,1)}
+.send:hover{background:var(--sig);transform:translateY(-2px)}
+.send:focus-visible{outline:2px solid var(--sig);outline-offset:3px}
+.note{font-size:12.5px;font-weight:700;color:#5e5c57;line-height:1.8}
+.done{font-weight:900;color:var(--sig)}
+.thanks{display:none;padding:18px 20px;border:2px solid var(--sig);font-weight:700;line-height:1.8}
+.thanks b{color:var(--sig);margin-right:8px}
+.thanks:target{display:block}
+.ul{text-decoration:underline;text-underline-offset:3px}
+.ul:hover{color:var(--sig)}
+
+/* footer */
+footer{border-top:1px solid var(--ink);padding:clamp(40px,6vw,72px) var(--gut) 28px;display:grid;grid-template-columns:minmax(0,1fr);gap:28px;overflow:hidden}
+.fwm{font-family:var(--disp);font-weight:900;font-variation-settings:"wdth" 105;font-size:min(16vw,230px);line-height:.8;letter-spacing:-.03em;white-space:nowrap}
+.fwm span{color:var(--sig)}
+.fnav{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 24px;font:500 11px var(--mono);letter-spacing:.08em;color:#5e5c57}
+.fnav nav{display:flex;flex-wrap:wrap;gap:8px 20px;font:700 12.5px var(--jp);letter-spacing:0;color:var(--ink)}
+.fnav nav a{height:auto;overflow:visible}
+.fnav nav a:hover{color:var(--sig)}
+
+@media (max-width:860px){
+  .sec-head,.vault,.contact,.faq,.dodont{grid-template-columns:1fr}
+  .cases{grid-template-columns:1fr 1fr}
+  .opts{grid-template-columns:1fr}
+  .trial{grid-template-columns:1fr;justify-items:start}
+  .flow{grid-template-columns:1fr;gap:0}
+  .flow::before{left:7px;right:auto;top:0;bottom:0;width:2px;height:auto;transform:scaleY(0);transform-origin:top}
+  .flow.in::before{transform:scaleY(1)}
+  .flow li{padding:0 0 28px 40px}
+  .flow li::before{top:2px}
+  .row{grid-template-columns:72px minmax(0,1fr)}
+  .row .yen{grid-column:1/-1;text-align:left}
+  .scale{display:none}
+  .two{grid-template-columns:1fr}
+  details .a{padding-right:0}
+}
+@media (max-width:520px){.cases{grid-template-columns:1fr}}
+
+
+@media (max-width:860px){
+  .topbar nav,.topbar .rec,.band .lab{display:none}
+  .menubtn{display:flex}
+  .meta span:nth-child(3){display:none}
+  .word{font-size:23vw}
+  .copy{grid-template-columns:1fr;align-items:start}
+  .ctl{flex-direction:row;justify-content:space-between;align-items:center}
+  .hero{grid-template-rows:auto auto auto minmax(170px,1fr) auto}
+}
+@media (hover:none){.cur{display:none}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.word .in,h1 .ln>span{transform:none}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="logo" href="#top" aria-label="ノイトル トップへ"><b>NOITORU</b><small>ノイトル</small></a>
+  <nav aria-label="メイン">
+    <a href="#service"><span>こんな録音に</span><span>こんな録音に</span></a>
+    <a href="#price"><span>料金</span><span>料金</span></a>
+    <a href="#flow"><span>ご依頼の流れ</span><span>ご依頼の流れ</span></a>
+    <a href="#privacy"><span>守秘</span><span>守秘</span></a>
+    <a href="#faq"><span>よくある質問</span><span>よくある質問</span></a>
+    <a href="#contact"><span>お問い合わせ</span><span>お問い合わせ</span></a>
+  </nav>
+  <div class="rec" aria-hidden="true"><i></i><span id="tc">REC 00:00:00:00</span></div>
+  <button class="menubtn" id="menubtn" type="button" aria-expanded="false" aria-controls="menu"><span id="menulbl">MENU</span><i></i></button>
+</header>
+<div class="menu" id="menu" hidden>
+  <div class="menu-in">
+    <p class="fig">Menu</p>
+    <nav aria-label="メニュー">
+      <a href="#top" style="--i:0"><b>Top</b><span>トップ</span></a>
+      <a href="#service" style="--i:1"><b>Service</b><span>こんな録音に</span></a>
+      <a href="#price" style="--i:2"><b>Price</b><span>料金・無料お試し</span></a>
+      <a href="#flow" style="--i:3"><b>Flow</b><span>ご依頼の流れ</span></a>
+      <a href="#privacy" style="--i:4"><b>Privacy</b><span>守秘とデータ</span></a>
+      <a href="#faq" style="--i:5"><b>FAQ</b><span>よくある質問</span></a>
+      <a href="#contact" style="--i:6"><b>Contact</b><span>お問い合わせ</span></a>
+    </nav>
+    <a class="menu-cta" href="#trial">20秒の無料お試し <span aria-hidden="true">→</span></a>
+  </div>
+</div>
+<div class="wipe" id="wipe" aria-hidden="true"><i style="--i:5"></i><i style="--i:3"></i><i style="--i:1"></i><i style="--i:0"></i><i style="--i:2"></i><i style="--i:4"></i><i style="--i:6"></i><i style="--i:8"></i><i style="--i:7"></i><i style="--i:9"></i><i style="--i:11"></i><i style="--i:10"></i></div>
+
+<section class="hero" id="top" data-view="top">
+  <div class="grid" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <canvas id="fx" aria-hidden="true"></canvas>
+
+  <div class="hd-space" aria-hidden="true"></div>
+
+  <div class="meta" aria-hidden="true">
+    <span>Audio clean-up service</span>
+    <span>Fig.01 — <b id="state">Noise</b></span>
+    <span>48 kHz / 24 bit / mono</span>
+  </div>
+
+  <div class="word" id="word" aria-hidden="true">
+    <span class="L"><span class="a"><span class="in" style="animation-delay:.05s">N</span></span><span class="b">V</span></span>
+    <span class="L"><span class="a"><span class="in" style="animation-delay:.13s">O</span></span></span>
+    <span class="L"><span class="a"><span class="in" style="animation-delay:.21s">I</span></span></span>
+    <span class="L"><span class="a"><span class="in" style="animation-delay:.29s">S</span></span><span class="b">C</span></span>
+    <span class="L"><span class="a"><span class="in" style="animation-delay:.37s">E</span></span></span>
+  </div>
+
+  <div class="band" id="band">
+    <div class="lab l"><span>IN</span><b>雑音まじり</b></div>
+    <div class="lab r"><span>OUT</span><b>聞き取れる声</b></div>
+    <div class="hint" id="hint"><i></i>なぞって、ノイズを取る<i></i></div>
+  </div>
+
+  <div class="copy">
+    <div>
+      <p class="eyebrow">録音の雑音、取ります</p>
+      <h1 aria-label="その録音、ちゃんと聞き取れるように。">
+        <span class="ln"><span style="animation-delay:.55s">その録音、</span></span>
+        <span class="ln"><span style="animation-delay:.68s">ちゃんと<span class="mk">聞き取れる<svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"><path id="squig" d="M0 5 L100 5"/></svg></span>ように。</span></span>
+      </h1>
+    </div>
+    <div>
+      <p class="lead">エアコンの音、車の走行音、カバンの中のこもった声、遠くて小さな話し声。聞こえなかった言葉を、聞こえるところまで整えます。原本には手を付けません。</p>
+      <ul class="facts">
+        <li data-n="01">〜10分 <em>¥5,000</em>（税込）</li>
+        <li data-n="02">標準 <em>3営業日</em></li>
+        <li data-n="03">原本は<em>そのまま</em></li>
+        <li data-n="04">作業後に<em>削除</em></li>
+      </ul>
+    </div>
+    <div class="ctl">
+      <a class="badge" href="#contact" aria-label="20秒の無料お試しを申し込む">
+        <svg viewBox="0 0 100 100" aria-hidden="true"><defs><path id="circ" d="M50 50 m-39 0 a39 39 0 1 1 78 0 a39 39 0 1 1 -78 0"/></defs>
+          <text><textPath href="#circ">Free trial · 20 seconds · Free trial · 20 seconds ·</textPath></text></svg>
+        <span class="c"><b>20s</b><small>無料でためす</small></span>
+      </a>
+      <button class="sw" id="sw" type="button" aria-pressed="false"><span class="t"><span class="k"></span></span><span id="swl">ノイズを取る</span></button>
+    </div>
+  </div>
+
+</section>
+
+<div class="cur" id="cur" aria-hidden="true"><span class="o"></span><span class="d"></span></div>
+<div class="progress" id="prog" aria-hidden="true"></div>
+
+<section class="sec" id="service" data-view="service">
+  <div class="sec-head">
+    <div class="rv"><p class="fig">Fig.02 — <b>Service</b></p>
+      <h2><span class="en">Before / After</span>こんな録音に。</h2></div>
+    <p class="rv d1">雑音の種類によって、効く処理は変わります。音源の状態を聞いてから、いちばん聞き取りやすくなる方法を選びます。青い線が通ったところから、処理後の波形に変わります。カーソルで左右になぞると、好きな位置で処理の前と後を比べられます。</p>
+  </div>
+  <div class="cases">
+    <div class="case rv" data-k="hum" tabindex="0"><div class="no"><span>CASE 01</span><b>HUM</b></div><canvas></canvas><h3>エアコン・換気扇の音</h3><p>ずっと鳴っている「ブーン」「サー」という音を下げて、声を前に出します。</p></div>
+    <div class="case rv d1" data-k="rumble" tabindex="0"><div class="no"><span>CASE 02</span><b>RUMBLE</b></div><canvas></canvas><h3>車内・電車・屋外</h3><p>走行音や街の音に埋もれた会話を、聞き分けられるところまで整えます。</p></div>
+    <div class="case rv d2" data-k="muffle" tabindex="0"><div class="no"><span>CASE 03</span><b>MUFFLED</b></div><canvas></canvas><h3>カバン・ポケットの中</h3><p>布ごしにこもった声や、こすれる音を抑えて、輪郭をはっきりさせます。</p></div>
+    <div class="case rv" data-k="far" tabindex="0"><div class="no"><span>CASE 04</span><b>DISTANT</b></div><canvas></canvas><h3>遠くて小さな声</h3><p>離れた場所の話し声を持ち上げ、大きすぎる音とのバランスをそろえます。</p></div>
+    <div class="case rv d1" data-k="wind" tabindex="0"><div class="no"><span>CASE 05</span><b>WIND</b></div><canvas></canvas><h3>風・ふく音</h3><p>マイクに当たる風の「ボッ」という音を減らします。</p></div>
+    <div class="case rv d2" data-k="phone" tabindex="0"><div class="no"><span>CASE 06</span><b>PHONE</b></div><canvas></canvas><h3>電話・スピーカーの声</h3><p>通話の録音や、スピーカーから出た声の割れ・こもりを聞きやすくします。</p></div>
+  </div>
+
+  <div class="dodont">
+    <div class="do rv"><h3><span>やること</span><span>DO</span></h3>
+      <ul>
+        <li><span>雑音を減らす</span><small>ノイズ除去</small></li>
+        <li><span>声を聞き取りやすくする</span><small>明瞭化・音量調整</small></li>
+        <li><span>処理の内容を書いて渡す</span><small>処理メモ（料金に込み）</small></li>
+        <li><span>原本をそのまま残す</span><small>処理は別ファイルで</small></li>
+      </ul></div>
+    <div class="dont rv d1" id="dont"><h3><span>やらないこと</span><span>DON'T</span></h3>
+      <ul>
+        <li><span>声紋で、誰の声かを決める</span><small>鑑定は専門機関へ</small></li>
+        <li><span>編集されたかどうかを判定する</span><small>改ざんの鑑定</small></li>
+        <li><span>言葉を足す・削る・つなぐ</span><small>中身は変えません</small></li>
+        <li><span>人を調べる・録音機を仕掛ける</span><small>調査はしません</small></li>
+      </ul></div>
+  </div>
+</section>
+
+<section class="sec" id="price" data-view="price">
+  <div class="sec-head">
+    <div class="rv"><p class="fig">Fig.03 — <b>Price</b></p>
+      <h2><span class="en">Price / Tax incl.</span>長さで決まる、<br>わかりやすい料金。</h2></div>
+    <p class="rv d1">お送りいただいた音声の合計の長さで計算します。ファイルの数による追加料金はありません。処理メモは料金に含みます。表示はすべて税込です。</p>
+  </div>
+  <div class="meter rv" id="meter">
+    <div class="row"><div class="len">〜10分<small>UP TO 10 MIN</small></div><div class="bar"><i style="--w:16.67%"></i></div><div class="yen">5,000<small>円</small></div></div>
+    <div class="row"><div class="len">〜30分<small>UP TO 30 MIN</small></div><div class="bar"><i style="--w:50%"></i></div><div class="yen">15,000<small>円</small></div></div>
+    <div class="row"><div class="len">〜60分<small>UP TO 60 MIN</small></div><div class="bar"><i style="--w:100%"></i></div><div class="yen">20,000<small>円</small></div></div>
+    <div class="row over"><div class="len">60分超<small>EVERY +30 MIN</small></div><div class="bar"><i style="--w:100%"></i></div><div class="yen">+5,000<small>円</small></div></div>
+    <div class="scale" aria-hidden="true"><span>0</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span><span>60 min</span></div>
+  </div>
+  <div class="opts">
+    <div class="opt rv"><span class="k">Option</span><b>特急（24時間以内） <em>+1,000円</em></b><p>お急ぎの場合は、受け取りから24時間以内にお届けします。</p></div>
+    <div class="opt rv d1"><span class="k">Option</span><b>音声処理証明書 <em>+5,000円</em></b><p>原本のハッシュ値（SHA-256）、使ったソフトと処理内容、中身を変えていないことを書面にします。</p></div>
+    <div class="opt rv d2"><span class="k">Payment</span><b>前払い・銀行振込</b><p>継続してご依頼いただく業者さまは、請求書払い（月末締め）にも対応します。</p></div>
+  </div>
+</section>
+
+<section class="sec trial" id="trial" data-view="price">
+  <div class="dial rv" aria-hidden="true">
+    <svg viewBox="0 0 200 200"><circle class="trk" cx="100" cy="100" r="92"/><g id="ticks"></g><circle class="arc" id="arc" cx="100" cy="100" r="92" transform="rotate(-90 100 100)"/></svg>
+    <div class="num"><div><b id="sec20">20</b><small>SECONDS FREE</small></div></div>
+  </div>
+  <div class="sec-head">
+    <div class="rv"><p class="fig">Fig.04 — <b>Free trial</b></p>
+      <h2><span class="en">Try before you pay</span>まず20秒、<br>無料でためす。</h2></div>
+    <p class="rv d1">聴き比べのサンプルは置いていません。録音の状態は一つひとつ違うので、お手元の音声の一部（20秒ほど）を無料で処理してお返しします。仕上がりを聞いて、納得されてから正式にご依頼ください。</p>
+    <div class="rv d2"><a class="cta2" href="#contact">無料お試しを申し込む <span aria-hidden="true">→</span></a></div>
+  </div>
+</section>
+
+<section class="sec" id="flow" data-view="flow">
+  <div class="sec-head">
+    <div class="rv"><p class="fig">Fig.05 — <b>Flow</b></p>
+      <h2><span class="en">How it works</span>ご依頼の流れ</h2></div>
+    <p class="rv d1">標準の納期は、音声を受け取ってから3営業日以内です。ファイルの量や音声の状態によって前後します。</p>
+  </div>
+  <ol class="flow" id="flowl">
+    <li><span class="n">STEP 1</span><h3>お問い合わせ</h3><p>フォームから、録音の長さと状態をお知らせください。匿名でもかまいません。</p></li>
+    <li><span class="n">STEP 2</span><h3>20秒の無料お試し</h3><p>一部を処理してお返しします。仕上がりをご確認ください。</p><span class="tag">FREE</span></li>
+    <li><span class="n">STEP 3</span><h3>お見積もり・お支払い</h3><p>合計の長さで料金をお伝えします。前払いの銀行振込です。</p></li>
+    <li><span class="n">STEP 4</span><h3>音声を送る</h3><p>ファイル転送サービス、または郵送（USB・SDカード）で。</p></li>
+    <li><span class="n">STEP 5</span><h3>処理・納品</h3><p>処理した音声と、処理メモをお届けします。</p><span class="tag">3 BUSINESS DAYS</span></li>
+    <li><span class="n">STEP 6</span><h3>データを削除</h3><p>ご確認いただいたあと、お預かりした音声を削除します。</p></li>
+  </ol>
+</section>
+
+<section class="sec" id="privacy" data-view="privacy">
+  <div class="sec-head">
+    <div class="rv"><p class="fig">Fig.06 — <b>Privacy</b></p>
+      <h2><span class="en">Original stays original</span>原本には、<br>手を付けない。</h2></div>
+    <p class="rv d1">証拠や記録に使う音声だからこそ、扱いは慎重にします。処理はコピーに対して行い、原本は受け取ったときの状態のまま残します。</p>
+  </div>
+  <div class="vault">
+    <div class="files rv">
+      <div class="file"><div class="top"><span>Original</span><b>Read only</b></div><div class="name">recording_original.m4a</div><div class="hash"><i>SHA-256（例）</i><br><span id="hash">—</span></div><span class="lock">LOCKED</span></div>
+      <div class="file copy"><div class="top"><span>Processed</span><b>Delivered</b></div><div class="name">recording_cleaned.wav</div><div class="hash">処理メモ：雑音を下げる／声の帯域を持ち上げる／音量をそろえる。切り貼り・削除はしていません。</div></div>
+    </div>
+    <ul class="promises rv d1">
+      <li><div><b>原本は加工しない</b><span>受け取った直後の状態を記録し、処理は別のファイルで行います。</span></div></li>
+      <li><div><b>外部のサービスに上げない</b><span>音声をクラウドの処理サービスや AI に送ることはしません。作業者1名だけが扱います。</span></div></li>
+      <li><div><b>確認後に削除する</b><span>納品して、内容をご確認いただいたあと、お預かりした音声を削除します。</span></div></li>
+      <li><div><b>秘密保持の約束を交わせる</b><span>ご希望があれば、書面で秘密保持の約束を交わします。</span></div></li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec" id="faq" data-view="faq">
+  <div class="sec-head">
+    <div class="rv"><p class="fig">Fig.07 — <b>FAQ</b></p>
+      <h2><span class="en">Questions</span>よくある質問</h2></div>
+  </div>
+  <div class="faq rv"><h3>01<span>ご依頼について</span></h3><div>
+    <details><summary>処理した音声は、裁判で使えますか？</summary><div class="a">当方は聞き取りやすくする処理を行うもので、鑑定ではありません。証拠としてどう使うかは、弁護士にご相談ください。ご希望の方には、原本のハッシュ値と処理内容を記した「音声処理証明書」をお付けできます（+5,000円）。</div></details>
+    <details><summary>全部聞き取れるようになりますか？</summary><div class="a">お約束はできません。録れていない音を作り出すことはできず、仕上がりは元の音声の状態しだいです。そのため、正式なご依頼の前に、20秒の無料お試しで仕上がりをご確認いただいています。</div></details>
+    <details><summary>内容を足したり削ったりしますか？</summary><div class="a">しません。切り貼りや削除は行わず、原本は加工しないまま保存します。</div></details>
+    <details><summary>匿名で依頼できますか？</summary><div class="a">できます。お名前はニックネームでもかまいません。連絡用のメールアドレスだけはお知らせください。</div></details>
+    <details><summary>探偵事務所や法律事務所から、継続して依頼できますか？</summary><div class="a">できます。継続してご依頼いただく業者さまは、請求書払い（月末締め）にも対応します。</div></details>
+  </div></div>
+  <div class="faq rv"><h3>02<span>料金とお支払い</span></h3><div>
+    <details><summary>仕上がりに満足できなかった場合、返金はありますか？</summary><div class="a">正式なご依頼の前に、無料お試しで仕上がりを確かめていただいているため、返金はお受けしていません。</div></details>
+    <details><summary>途中でキャンセルできますか？</summary><div class="a">作業を始める前なら、全額をお返しします。作業を始めたあとのキャンセルは、返金できません。</div></details>
+  </div></div>
+  <div class="faq rv"><h3>03<span>送り方と納品</span></h3><div>
+    <details><summary>どんなファイルに対応していますか？</summary><div class="a">MP3・WAV・M4A など、一般的な音声ファイルと動画ファイルに対応します。</div></details>
+    <details><summary>音声はどうやって送ればいいですか？</summary><div class="a">ギガファイル便などのファイル転送サービスで送ってください。郵送（USBメモリ・SDカード）でも受け付けます。原本は必ずお手元に残してください。</div></details>
+  </div></div>
+  <div class="faq rv"><h3>04<span>お受けできないもの</span></h3><div>
+    <ul class="refuse">
+      <li>鑑定（声紋・改ざんの判定）</li><li>調査そのもの</li><li>違法に録音された音声</li><li>重大な犯罪に関わる音声</li><li>集団ストーカー・電磁波攻撃などの証明</li><li>音楽・放送の加工</li>
+      <li class="ok">ご自身が参加している会話の録音は、お受けします</li>
+    </ul>
+    <p class="note">違法に録音されたものを偽って申し込まれたと分かった場合は、処理を中止し、返金しません。</p>
+  </div></div>
+</section>
+
+<section class="sec" id="contact" data-view="contact">
+  <div class="contact">
+    <div class="sec-head">
+      <div class="rv"><p class="fig">Fig.08 — <b>Contact</b></p>
+        <h2><span class="en">Get in touch</span>お問い合わせ</h2></div>
+      <p class="rv d1">無料お試しのお申し込み、お見積もり、ご相談はこちらから。匿名でもかまいません。</p>
+    </div>
+    <form id="form" class="rv d1" method="post" action="https://ssgform.com/s/U6UyZTuvEWkV" novalidate>
+      <div class="two">
+        <div class="fld"><label for="f-name">お名前 <em>ニックネーム可</em></label><input id="f-name" name="お名前" autocomplete="nickname"></div>
+        <div class="fld"><label for="f-mail">メールアドレス <em>必須</em></label><input id="f-mail" name="メールアドレス" type="email" autocomplete="email" required></div>
+      </div>
+      <div class="two">
+        <div class="fld"><label for="f-type">ご用件</label><select id="f-type" name="ご用件"><option>20秒の無料お試し</option><option>お見積もり</option><option>そのほかのご相談</option></select></div>
+        <div class="fld"><label for="f-len">録音の長さ（合計）</label><select id="f-len" name="録音の長さ"><option>〜10分</option><option>〜30分</option><option>〜60分</option><option>60分超</option><option>わからない</option></select></div>
+      </div>
+      <div class="fld"><label for="f-msg">録音の状態・ご相談内容</label><textarea id="f-msg" name="ご相談内容" placeholder="例：車内で録った会話。走行音が大きく、相手の声が聞き取れない。"></textarea></div>
+      <label class="chk"><input type="checkbox" id="f-legal" name="違法な録音ではない" value="約束する" required><span>違法に録音されたものではないことを約束します。</span></label>
+      <label class="chk"><input type="checkbox" id="f-terms" name="規約への同意" value="同意する" required><span><a href="#terms" class="ul">利用規約</a>と<a href="#privacy-policy" class="ul">プライバシーポリシー</a>に同意します。</span></label>
+      <button class="send" type="submit">送信する <span aria-hidden="true">→</span></button>
+      <p class="note" id="fmsg" aria-live="polite">送信すると、kikitori@noitoru.com から返信します。迷惑メールフォルダもご確認ください。</p>
+      <div class="thanks" id="sent" tabindex="-1"><b>送信しました。</b>内容を確認して、1営業日以内にメールでご返信します。</div>
+    </form>
+  </div>
+</section>
+
+<section class="sec legal" id="terms" data-view="terms">
+  <div class="sec-head">
+    <div class="rv"><p class="fig">Legal — <b>Terms</b></p><h2><span class="en">Terms of service</span>利用規約</h2></div>
+    <p class="rv d1">ノイトル（以下「当方」）が提供する音声の処理サービスを利用するときの決まりです。お申し込みの前にお読みください。</p>
+  </div>
+  <div class="doc rv">
+    <ol class="arts">
+      <li><h3>適用</h3><p>この規約は、当方のサービスを利用するすべての方（以下「依頼者」）に適用されます。依頼者は、この規約に同意したうえでお申し込みください。</p></li>
+      <li><h3>サービスの内容</h3><p>当方は、依頼者からお預かりした音声について、雑音を減らす、声を聞き取りやすくする、音量をそろえるなどの処理を行い、処理後の音声と処理内容のメモをお渡しします。</p><p>当方のサービスは鑑定ではありません。声紋による話者の特定、編集や改ざんの有無の判定、証拠としての有効性の保証は行いません。</p></li>
+      <li><h3>契約の成立</h3><p>依頼者がお見積もりを承諾し、当方が料金の入金を確認した時点で、契約が成立します。継続してご依頼いただく業者さまで、請求書払いを取り決めた場合は、当方が依頼を承諾した時点で成立します。</p></li>
+      <li><h3>お受けできない依頼</h3><p>次の依頼はお受けしません。</p><ul><li>違法に録音された音声の処理</li><li>重大な犯罪に関わる音声の処理</li><li>声紋鑑定・改ざんの鑑定</li><li>人を調べる、録音機器を設置するなどの調査</li><li>著作権のある音楽や放送の加工</li><li>そのほか、当方が不適切と判断した依頼</li></ul><p>依頼者は、お預かりする音声が違法に録音されたものでないことを約束するものとします。これに反して申し込まれたことが分かった場合、当方は処理を中止し、受け取った料金は返金しません。</p></li>
+      <li><h3>料金と支払い</h3><p>料金は、当サイトに掲載する料金表（税込）のとおりとし、お預かりした音声の合計の長さで計算します。支払いは前払いの銀行振込とし、振込手数料は依頼者の負担とします。</p><p>継続してご依頼いただく業者さまは、別に取り決めた場合、請求書払い（月末締め）とすることができます。</p></li>
+      <li><h3>納品</h3><p>標準の納期は、音声と料金の両方を受け取ってから3営業日以内です。ファイルの量や音声の状態によって前後する場合は、事前にお知らせします。</p></li>
+      <li><h3>仕上がり</h3><p>処理の結果は、元の音声の状態によって大きく変わります。当方は、処理によって音声が聞き取れるようになることを保証しません。正式なご依頼の前に、無料のお試し処理で仕上がりをご確認いただけます。このため、仕上がりを理由とする返金はお受けしません。</p></li>
+      <li><h3>キャンセル</h3><p>作業を始める前のキャンセルは、受け取った料金の全額をお返しします。作業を始めたあとのキャンセルは、返金できません。</p></li>
+      <li><h3>原本とデータの扱い</h3><p>依頼者は、お送りいただく音声の原本を、必ずご自身で保管してください。当方は原本を加工せず、処理は複製に対して行います。お預かりした音声は、納品後、依頼者の確認が済んだ時点で削除します。</p><p>送付中の破損や紛失、災害などやむを得ない事情によるデータの損失について、当方は責任を負いません。</p></li>
+      <li><h3>秘密の保持</h3><p>当方は、依頼の内容とお預かりした音声を、依頼者の同意なく第三者に開示しません。ただし、法令にもとづいて開示を求められた場合は除きます。ご希望があれば、別に秘密保持の約束を書面で交わします。</p></li>
+      <li><h3>責任の範囲</h3><p>当方の責任によって依頼者に損害が生じた場合、当方が賠償する額は、その依頼について受け取った料金を上限とします。ただし、当方に故意または重大な過失がある場合は除きます。</p></li>
+      <li><h3>規約の変更</h3><p>当方は、必要に応じてこの規約を変更することがあります。変更後の規約は、当サイトに掲載した時点から適用します。</p></li>
+      <li><h3>準拠法</h3><p>この規約は日本の法律に従って解釈します。</p></li>
+    </ol>
+    <p class="dated">制定：2026年10月9日</p>
+  </div>
+</section>
+
+<section class="sec legal" id="privacy-policy" data-view="privacy-policy">
+  <div class="sec-head">
+    <div class="rv"><p class="fig">Legal — <b>Privacy policy</b></p><h2><span class="en">Privacy policy</span>プライバシー<br>ポリシー</h2></div>
+    <p class="rv d1">当方がお預かりする個人情報と音声データを、どう扱うかを定めます。</p>
+  </div>
+  <div class="doc rv">
+    <ol class="arts">
+      <li><h3>取得する情報</h3><ul><li>お名前（ニックネームでもかまいません）</li><li>メールアドレス</li><li>お問い合わせ・ご依頼の内容</li><li>お預かりする音声データ</li><li>お振込みの名義など、お支払いに必要な情報</li></ul></li>
+      <li><h3>利用の目的</h3><p>取得した情報は、次の目的にだけ使います。</p><ul><li>お問い合わせへの返信、お見積もり</li><li>音声の処理と納品</li><li>料金の請求と入金の確認</li><li>トラブルへの対応</li></ul></li>
+      <li><h3>音声データの扱い</h3><p>お預かりした音声は、作業用のパソコンの中だけで扱い、クラウドの処理サービスや AI のサービスには送りません。作業は当方の作業者1名だけが行います。納品後、依頼者の確認が済んだ時点で削除します。</p></li>
+      <li><h3>第三者への提供</h3><p>ご本人の同意なく、個人情報を第三者に提供しません。ただし、法令にもとづく場合を除きます。</p></li>
+      <li><h3>外部サービスの利用</h3><p>当方は、メールの送受信とサイトの運営に、レンタルサーバーの事業者のサービスを使っています。お問い合わせフォームの内容は、フォーム送信サービス（ssgform）を通じてメールで当方に届きます。このサービスは送信内容を保存しない仕組みです。</p></li>
+      <li><h3>安全管理</h3><p>個人情報と音声データがもれたり、なくなったりしないよう、必要な対策をとります。</p></li>
+      <li><h3>開示・訂正・削除のご請求</h3><p>ご本人から、ご自身の個人情報の開示・訂正・削除を求められた場合は、ご本人であることを確認したうえで、遅滞なく対応します。</p></li>
+      <li><h3>お問い合わせ窓口</h3><p>このポリシーについてのお問い合わせは、当サイトのお問い合わせフォームからお願いします。</p></li>
+      <li><h3>改定</h3><p>このポリシーは、必要に応じて改定します。改定後の内容は、当サイトに掲載した時点から適用します。</p></li>
+    </ol>
+    <p class="dated">制定：2026年10月9日</p>
+  </div>
+</section>
+
+<section class="sec legal" id="tokushoho" data-view="tokushoho">
+  <div class="sec-head">
+    <div class="rv"><p class="fig">Legal — <b>Act on specified commercial transactions</b></p><h2><span class="en">Notation</span>特定商取引法に<br>基づく表記</h2></div>
+  </div>
+  <div class="doc rv">
+    <dl class="spec">
+      <div><dt>事業者</dt><dd>ノイトル（NOITORU）</dd></div>
+      <div><dt>運営責任者</dt><dd>請求があった場合には、電子メールにて遅滞なく提供します。</dd></div>
+      <div><dt>所在地</dt><dd>請求があった場合には、電子メールにて遅滞なく提供します。</dd></div>
+      <div><dt>電話番号</dt><dd>請求があった場合には、電子メールにて遅滞なく提供します。</dd></div>
+      <div><dt>メールアドレス</dt><dd><span class="mail" data-u="kikitori" data-d="noitoru.com">kikitori ＠ noitoru.com</span>（お問い合わせはフォームからもどうぞ）</dd></div>
+      <div><dt>販売価格</dt><dd>料金のページに記載しています（税込）。</dd></div>
+      <div><dt>価格以外に必要な費用</dt><dd>銀行振込の手数料。郵送で音声を送る場合の送料と、メディア（USBメモリ・SDカード）の費用。</dd></div>
+      <div><dt>支払い方法</dt><dd>銀行振込（前払い）。継続してご依頼いただく業者さまは、請求書払い（月末締め）も可能です。</dd></div>
+      <div><dt>支払いの時期</dt><dd>お見積もりを承諾いただいたあと、作業を始める前にお支払いください。</dd></div>
+      <div><dt>サービスの提供時期</dt><dd>音声と料金の両方を受け取ってから、標準で3営業日以内に納品します。ファイルの量や音声の状態によって前後します。特急（+1,000円）の場合は24時間以内です。</dd></div>
+      <div><dt>キャンセル・返金</dt><dd>作業を始める前のキャンセルは全額を返金します。作業を始めたあとのキャンセル、および仕上がりを理由とする返金はお受けしていません（正式なご依頼の前に、無料のお試し処理で仕上がりをご確認いただけます）。</dd></div>
+    </dl>
+  </div>
+</section>
+
+<a class="nextv" id="nextv" href="#service"><div><small>NEXT</small><b id="nv-en">Service</b><span class="jp" id="nv-jp">こんな録音に</span></div><span class="arr" aria-hidden="true">→</span></a>
+
+<footer>
+  <div class="fwm" aria-hidden="true">NOI<span>TORU</span></div>
+  <div class="fnav">
+    <nav aria-label="規約">
+      <a href="#terms">利用規約</a><a href="#privacy-policy">プライバシーポリシー</a><a href="#tokushoho">特定商取引法に基づく表記</a>
+    </nav>
+    <span>© 2026 NOITORU</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = s => document.querySelector(s);
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const rnd = (a, b) => a + Math.random() * (b - a);
+
+  /* timecode (24fps) */
+  const tc = $('#tc'), T0 = performance.now(), p2 = n => String(n).padStart(2, '0');
+  setInterval(() => {
+    const f = Math.floor((performance.now() - T0) / 1000 * 24), s = Math.floor(f / 24);
+    tc.textContent = `REC ${p2(Math.floor(s / 3600))}:${p2(Math.floor(s / 60) % 60)}:${p2(s % 60)}:${p2(f % 24)}`;
+  }, 42);
+
+  /* state */
+  let globalClean = false, level = 0, voice = false, interacted = false;
+  const word = $('#word'), stateEl = $('#state');
+  function setVoice(v) {
+    if (v === voice) return;
+    voice = v; word.classList.toggle('voice', v); stateEl.textContent = v ? 'Voice' : 'Noise';
+  }
+  const sw = $('#sw');
+  sw.addEventListener('click', () => {
+    globalClean = !globalClean; interacted = true;
+    sw.setAttribute('aria-pressed', globalClean);
+    $('#swl').textContent = globalClean ? 'ノイズを戻す' : 'ノイズを取る';
+  });
+
+  /* giant letters: kinetic width + noise jitter */
+  const letters = [...word.querySelectorAll(':scope > .L')];
+  const lw = letters.map(() => ({ w: 100, g: 900, jx: 0, jy: 0, sk: 0 }));
+  let mx = -1e4, my = -1e4, moved = 0, inHero = false;
+  setInterval(() => {
+    lw.forEach(o => {
+      const n = 1 - level, hit = Math.random() < .35 * n;
+      o.jx = hit ? (Math.random() - .5) * 14 * n : 0;
+      o.jy = hit ? (Math.random() - .5) * 8 * n : 0;
+      o.sk = hit ? (Math.random() - .5) * 10 * n : 0;
+    });
+  }, 110);
+  const FR = { w0: 72, w1: 125, g0: 850, g1: 900 };
+  function typeFrame() {
+    letters.forEach((el, i) => {
+      const r = el.getBoundingClientRect();
+      const d = Math.hypot(mx - (r.left + r.width / 2), my - (r.top + r.height / 2));
+      const p = inHero ? Math.max(0, 1 - d / 520) : 0;
+      const o = lw[i];
+      o.w = lerp(o.w, FR.w0 + p * (FR.w1 - FR.w0), .12);
+      o.g = lerp(o.g, FR.g0 + p * (FR.g1 - FR.g0), .12);
+      el.style.fontVariationSettings = `"wdth" ${o.w.toFixed(1)}, "wght" ${o.g.toFixed(0)}`;
+      el.style.transform = `translate(${o.jx}px,${o.jy}px) skewX(${o.sk}deg)`;
+    });
+  }
+
+  /* squiggle underline */
+  const sq = $('#squig');
+  function squigFrame(t) {
+    const n = 1 - level, pts = [];
+    for (let i = 0; i <= 40; i++) {
+      const y = 5 + n * (Math.sin(i * 1.9 + t * 9) * 3 + (Math.random() - .5) * 3.2);
+      pts.push(`${i ? 'L' : 'M'}${(i * 2.5).toFixed(1)} ${y.toFixed(2)}`);
+    }
+    sq.setAttribute('d', pts.join(''));
+  }
+
+  /* canvas: shapes -> signal bars, dust -> removed */
+  const cv = $('#fx'), cx = cv.getContext('2d'), band = $('#band'), hero = $('#top');
+  let W, H, sig = [], dust = [], B;
+  const KINDS = ['circle', 'square', 'tri', 'ring', 'cross', 'bar'];
+  function build() {
+    const DPR = Math.min(devicePixelRatio || 1, 2);
+    W = hero.clientWidth; H = hero.clientHeight;
+    cv.width = W * DPR; cv.height = H * DPR; cx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    const br = band.getBoundingClientRect(), hr = hero.getBoundingClientRect();
+    B = { y: br.top - hr.top + br.height / 2, h: br.height };
+    B.r = Math.min(B.h * .4, 100);
+    const gut = W < 860 ? 16 : Math.min(48, W * .032);
+    const x0 = W < 860 ? gut : gut + 120, x1 = W < 860 ? W - gut : W - gut - 120;
+    const NB = Math.max(28, Math.min(84, Math.floor((x1 - x0) / 15)));
+    sig = Array.from({ length: NB }, (_, i) => ({
+      tx: x0 + (i / (NB - 1)) * (x1 - x0), bw: Math.max(3, (x1 - x0) / NB * .42),
+      x: rnd(0, W), y: B.y + rnd(-B.r, B.r), vx: rnd(-.4, .4), vy: rnd(-.3, .3),
+      k: KINDS[Math.floor(Math.random() * KINDS.length)], s: rnd(9, 26), r: rnd(0, 6.28), vr: rnd(-.03, .03),
+      m: 0, local: 0, ink: Math.random() < .72
+    }));
+    dust = Array.from({ length: Math.floor(W * H / 4200) }, () => ({
+      x: rnd(0, W), y: rnd(0, H), k: Math.random() < .5 ? 'dot' : Math.random() < .5 ? 'plus' : 'dash',
+      s: rnd(1.5, 4.5), a: rnd(.25, .7), c: 0
+    }));
+  }
+  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 120); });
+
+  const cur = $('#cur');
+  hero.addEventListener('pointermove', e => {
+    mx = e.clientX; my = e.clientY; inHero = true; moved = performance.now();
+    cur.style.transform = `translate(${mx}px,${my}px)`;
+    cur.classList.add('on');
+    cur.classList.toggle('small', !!e.target.closest('a,button'));
+    if (!interacted && Math.hypot(e.movementX, e.movementY) > 2) { interacted = true; $('#hint').style.opacity = 0; }
+  });
+  hero.addEventListener('pointerleave', () => { inHero = false; cur.classList.remove('on'); });
+
+  function speech(i, t) {
+    const x = i * .23;
+    const env = Math.max(0, Math.sin(x * .9 + t * 1.6)) ** 2 * .75 + Math.max(0, Math.sin(x * 2.3 - t * 2.4 + 1.1)) ** 3 * .45 + .08;
+    return Math.min(1, env * (.55 + .45 * Math.abs(Math.sin(x * 7.1 + t * 11))));
+  }
+
+  function drawShape(k, s) {
+    const h = s / 2;
+    cx.beginPath();
+    if (k === 'circle') { cx.arc(0, 0, h, 0, 6.283); cx.fill(); }
+    else if (k === 'ring') { cx.arc(0, 0, h * .85, 0, 6.283); cx.lineWidth = 2; cx.stroke(); }
+    else if (k === 'square') { cx.rect(-h, -h, s, s); cx.fill(); }
+    else if (k === 'tri') { cx.moveTo(0, -h); cx.lineTo(h, h * .8); cx.lineTo(-h, h * .8); cx.closePath(); cx.fill(); }
+    else if (k === 'cross') { cx.lineWidth = 2.2; cx.moveTo(-h, 0); cx.lineTo(h, 0); cx.moveTo(0, -h); cx.lineTo(0, h); cx.stroke(); }
+    else { cx.rect(-h, -s * .14, s, s * .28); cx.fill(); }
+  }
+
+  let introT = null;
+  function frame(now) {
+    const t = now / 1000;
+    if (introT === null) introT = now;
+    const since = (now - introT) / 1000;
+    const demo = !interacted && since > 2.2 && since < 4.6;   // 最初に一度だけ整って見せる
+    const idle = !inHero || now - moved > 3000;
+    level = lerp(level, globalClean || demo ? 1 : 0, .045);
+
+    cx.clearRect(0, 0, W, H);
+    const scanX = idle && !globalClean ? ((Math.sin(t * .5) + 1) / 2) * W : null;
+    const px = scanX ?? mx, rad = scanX !== null ? 110 : 170;
+    const yNear = scanX !== null ? 1 : Math.max(0, 1 - Math.abs(my - B.y) / (B.h * 1.6 + 120));
+
+    cx.strokeStyle = 'rgba(18,18,18,.18)'; cx.lineWidth = 1;
+    cx.beginPath(); cx.moveTo(0, B.y + .5); cx.lineTo(W, B.y + .5); cx.stroke();
+
+    // dust
+    for (const d of dust) {
+      const near = Math.max(0, 1 - Math.hypot(d.x - mx, d.y - my) / (rad * 1.2));
+      const hit = scanX !== null ? Math.max(0, 1 - Math.abs(d.x - scanX) / rad) : near;
+      d.c = Math.max(d.c * .985, hit);
+      const inBand = Math.abs(d.y - B.y) < B.h * .6 ? 1 : .18;
+      const vis = (1 - Math.max(d.c, level)) * d.a * inBand;
+      if (vis < .02) continue;
+      if (Math.random() < .5) { d.x += rnd(-1.2, 1.2); d.y += rnd(-1.2, 1.2); }
+      if (near > 0 && scanX === null) { const a = Math.atan2(d.y - my, d.x - mx); d.x += Math.cos(a) * near * 6; d.y += Math.sin(a) * near * 6; }
+      if (d.x < 0) d.x += W; if (d.x > W) d.x -= W; if (d.y < 0) d.y += H; if (d.y > H) d.y -= H;
+      cx.globalAlpha = vis; cx.fillStyle = cx.strokeStyle = '#8f8c84';
+      if (d.k === 'dot') cx.fillRect(d.x, d.y, d.s * .6, d.s * .6);
+      else if (d.k === 'plus') { cx.lineWidth = 1; cx.beginPath(); cx.moveTo(d.x - d.s, d.y); cx.lineTo(d.x + d.s, d.y); cx.moveTo(d.x, d.y - d.s); cx.lineTo(d.x, d.y + d.s); cx.stroke(); }
+      else cx.fillRect(d.x, d.y, d.s * 2.2, 1);
+    }
+    cx.globalAlpha = 1;
+
+    // noisy line
+    cx.beginPath();
+    for (let x = 0; x <= W; x += 6) {
+      const y = B.y + (1 - level) * ((Math.random() - .5) * B.h * .35 + Math.sin(x * .05 + t * 30) * 4);
+      x ? cx.lineTo(x, y) : cx.moveTo(x, y);
+    }
+    cx.strokeStyle = `rgba(18,18,18,${.35 * (1 - level)})`; cx.stroke();
+
+    // signal shapes
+    let sum = 0;
+    sig.forEach((p, i) => {
+      const hit = Math.max(0, 1 - Math.abs(p.tx - px) / rad) * yNear;
+      p.local = Math.max(p.local * .988, hit);
+      p.m = lerp(p.m, Math.max(p.local, level), .14);
+      sum += p.m;
+      const e = ease(Math.min(1, p.m));
+      p.x += p.vx + rnd(-.6, .6) * (1 - e); p.y += p.vy + rnd(-.6, .6) * (1 - e); p.r += p.vr * (1 - e) * 2;
+      if (p.x < -30) p.x = W + 30; if (p.x > W + 30) p.x = -30;
+      if (p.y < B.y - B.r) p.vy = Math.abs(p.vy), p.y = B.y - B.r; if (p.y > B.y + B.r) p.vy = -Math.abs(p.vy), p.y = B.y + B.r;
+      const bh = Math.max(4, speech(i, t) * B.r * 2);
+      cx.save(); cx.translate(lerp(p.x, p.tx, e), lerp(p.y, B.y, e)); cx.rotate(p.r * (1 - e));
+      cx.fillStyle = cx.strokeStyle = e > .5 || !p.ink ? '#2f45ff' : '#121212';
+      if (e < .55) { cx.globalAlpha = 1 - Math.max(0, (e - .35) / .2); drawShape(p.k, p.s * (1 - e * .4)); }
+      if (e > .35) {
+        cx.globalAlpha = Math.min(1, (e - .35) / .2);
+        const w = lerp(p.s, p.bw, e), hh = lerp(p.s, bh, e);
+        cx.beginPath(); cx.roundRect(-w / 2, -hh / 2, w, hh, Math.min(w, hh) / 2); cx.fill();
+      }
+      cx.restore();
+    });
+    cx.globalAlpha = 1;
+
+    if (scanX !== null && level < .8) {
+      const g = cx.createLinearGradient(0, B.y - B.h, 0, B.y + B.h);
+      g.addColorStop(0, 'rgba(47,69,255,0)'); g.addColorStop(.5, 'rgba(47,69,255,.55)'); g.addColorStop(1, 'rgba(47,69,255,0)');
+      cx.fillStyle = g; cx.fillRect(scanX, B.y - B.h, 1, B.h * 2);
+    }
+
+    const avg = sum / sig.length;
+    if (avg > .45) setVoice(true); else if (avg < .25) setVoice(false);
+    typeFrame(); squigFrame(t);
+    if (!RM) requestAnimationFrame(frame);
+  }
+  build();
+  if (RM) { level = 1; setVoice(true); }
+  document.fonts.ready.then(() => { build(); requestAnimationFrame(frame); });
+})();
+</script>
+<script>
+(() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.documentElement.classList.add('js');
+
+  /* scroll progress */
+  const prog = document.getElementById('prog');
+  const onScroll = () => {
+    const h = document.documentElement.scrollHeight - innerHeight;
+    prog.style.transform = `scaleX(${h > 0 ? scrollY / h : 0})`;
+  };
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  /* reveal */
+  const targets = document.querySelectorAll('.rv, #dont, #meter, #flowl');
+  if (RM || !('IntersectionObserver' in window)) targets.forEach(el => el.classList.add('in'));
+  else {
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0, rootMargin: '0px 0px -12% 0px' });
+    targets.forEach(el => io.observe(el));
+  }
+
+  /* case waveforms: before -> after（処理ヘッドが左から右へ通る） */
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const state = [...document.querySelectorAll('.case')].map((el, i) => {
+    const cv = el.querySelector('canvas');
+    const s = { el, cv, ctx: cv.getContext('2d'), k: el.dataset.k, vis: false, seed: Math.random() * 10, off: i * .55, scrub: null, rel: 0, p: 0 };
+    const pos = e => { const r = cv.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); };
+    cv.addEventListener('pointermove', e => { s.scrub = pos(e); clearTimeout(s.rel); });
+    cv.addEventListener('pointerdown', e => { s.scrub = pos(e); clearTimeout(s.rel); });
+    cv.addEventListener('pointerleave', () => { s.scrub = null; });
+    cv.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') s.rel = setTimeout(() => s.scrub = null, 1600); });
+    return s;
+  });
+  if ('IntersectionObserver' in window) {
+    const vio = new IntersectionObserver(es => es.forEach(e => { const s = state.find(x => x.el === e.target); if (s) s.vis = e.isIntersecting; }));
+    state.forEach(s => vio.observe(s.el));
+  } else state.forEach(s => s.vis = true);
+
+  function size(s) {
+    const r = s.cv.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+    if (s.w === r.width && s.h === r.height) return;
+    s.w = r.width; s.h = r.height; s.cv.width = r.width * d; s.cv.height = r.height * d;
+    s.ctx.setTransform(d, 0, 0, d, 0, 0);
+  }
+  const voice = (x, t, sd) => {
+    const env = Math.max(0, Math.sin(x * 6 + t * 1.7 + sd)) ** 2 * .8 + Math.max(0, Math.sin(x * 15 - t * 2.3 + sd * 2)) ** 3 * .4;
+    return env * Math.sin(x * 120 + t * 9) * .9;
+  };
+  function noise(k, x, t, sig) {
+    const r = Math.random() - .5;
+    switch (k) {
+      case 'hum': return Math.sin(x * 260 + t * 30) * .35 + r * .12;
+      case 'rumble': return Math.sin(x * 9 + t * 4) * .5 + Math.sin(x * 23 - t * 6) * .25 + r * .2;
+      case 'muffle': return -sig * .7 + r * .1 + Math.sin(x * 40 + t * 8) * .08;
+      case 'far': return -sig * .82 + r * .32;
+      case 'wind': { const g = Math.max(0, Math.sin(x * 4 + t * 2.2)) ** 6; return g * (r * 2.4) + r * .08; }
+      case 'phone': return Math.max(-.35, Math.min(.35, sig)) - sig + r * .22;
+    }
+    return 0;
+  }
+  const CYCLE = 4.8;
+  function wave(s, t, clean) {
+    const { ctx, w, h } = s, mid = h / 2 + 6, N = Math.floor(w / 2.5);
+    ctx.beginPath();
+    for (let i = 0; i <= N; i++) {
+      const x = i / N, sig = voice(x, t, s.seed);
+      const y = mid - (sig + (clean ? 0 : noise(s.k, x, t, sig))) * h * .36;
+      i ? ctx.lineTo(x * w, y) : ctx.moveTo(0, y);
+    }
+  }
+  function draw(now) {
+    const t = now / 1000;
+    for (const s of state) {
+      if (!s.vis) continue;
+      size(s);
+      let target;
+      if (s.scrub !== null) target = s.scrub;
+      else if (RM) target = 1;
+      else {
+        const c = (t + s.off) % CYCLE;
+        target = c < 2.6 ? ease(c / 2.6) : c < 4.2 ? 1 : 1 - ease((c - 4.2) / .6);
+      }
+      s.p += (target - s.p) * (s.scrub !== null ? .3 : 1);
+      s.el.classList.toggle('clean', s.p > .97);
+      const { ctx, w, h } = s, hx = s.p * w;
+      ctx.clearRect(0, 0, w, h);
+      ctx.strokeStyle = 'rgba(18,18,18,.12)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, h / 2 + 6.5); ctx.lineTo(w, h / 2 + 6.5); ctx.stroke();
+      ctx.lineJoin = 'round';
+      // BEFORE（まだ処理していない右側）
+      ctx.save(); ctx.beginPath(); ctx.rect(hx, 0, w - hx, h); ctx.clip();
+      wave(s, t, false); ctx.strokeStyle = 'rgba(18,18,18,.6)'; ctx.lineWidth = 1.1; ctx.stroke(); ctx.restore();
+      // AFTER（処理が済んだ左側）
+      ctx.save(); ctx.beginPath(); ctx.rect(0, 0, hx, h); ctx.clip();
+      wave(s, t, true); ctx.strokeStyle = '#2f45ff'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+      // labels + head
+      ctx.font = '500 9px "JetBrains Mono", ui-monospace, monospace'; ctx.textBaseline = 'top';
+      ctx.globalAlpha = Math.min(1, s.p * 5); ctx.fillStyle = '#2f45ff'; ctx.textAlign = 'left'; ctx.fillText('AFTER', 0, 0);
+      ctx.globalAlpha = Math.min(1, (1 - s.p) * 5); ctx.fillStyle = '#5e5c57'; ctx.textAlign = 'right'; ctx.fillText('BEFORE', w, 0);
+      ctx.globalAlpha = 1;
+      if (s.p > .004 && s.p < .996) {
+        ctx.fillStyle = '#2f45ff'; ctx.fillRect(hx - 1, 14, 2, h - 14);
+        ctx.beginPath(); ctx.moveTo(hx - 5, 14); ctx.lineTo(hx + 5, 14); ctx.lineTo(hx, 20); ctx.closePath(); ctx.fill();
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+
+  /* 20 second dial */
+  const ticks = document.getElementById('ticks'), arc = document.getElementById('arc'), num = document.getElementById('sec20');
+  let tk = '';
+  for (let i = 0; i < 60; i++) {
+    const a = i / 60 * Math.PI * 2, r1 = i % 3 ? 84 : 80, r2 = 88;
+    tk += `<line class="tk" x1="${100 + Math.cos(a) * r1}" y1="${100 + Math.sin(a) * r1}" x2="${100 + Math.cos(a) * r2}" y2="${100 + Math.sin(a) * r2}"/>`;
+  }
+  ticks.innerHTML = tk;
+  const C = 2 * Math.PI * 92;
+  arc.style.strokeDasharray = C;
+  function dial(now) {
+    const p = RM ? 1 : (now / 1000 % 22) / 20;
+    const q = Math.min(1, p);
+    arc.style.strokeDashoffset = C * (1 - q);
+    num.textContent = String(Math.max(0, Math.ceil(20 - q * 20))).padStart(2, '0');
+    if (!RM) requestAnimationFrame(dial);
+  }
+  requestAnimationFrame(dial);
+
+  /* hash: 文字が流れてから確定する */
+  const hashEl = document.getElementById('hash');
+  const HEX = '0123456789abcdef', FINAL = '3f9a7c21e4b80d56a1c9f2e7b4d03a8865c1e9f7d2a4b6c80e13f5a7c9d2e4b1';
+  let hashDone = false;
+  function scramble() {
+    let n = 0;
+    const id = setInterval(() => {
+      n++;
+      hashEl.textContent = [...FINAL].map((c, i) => i < n * 2 ? c : HEX[Math.floor(Math.random() * 16)]).join('');
+      if (n * 2 >= FINAL.length) clearInterval(id);
+    }, 40);
+  }
+  if (RM) hashEl.textContent = FINAL;
+  else if ('IntersectionObserver' in window) {
+    const hio = new IntersectionObserver(es => { if (es[0].isIntersecting && !hashDone) { hashDone = true; scramble(); } }, { threshold: .5 });
+    hio.observe(hashEl);
+  } else hashEl.textContent = FINAL;
+
+
+  /* views + menu */
+  const ORDER = ['top', 'service', 'price', 'flow', 'privacy', 'faq', 'contact'];
+  const EN = { terms: 'Terms', 'privacy-policy': 'Privacy', tokushoho: 'Notation', top: 'Top', service: 'Service', price: 'Price', flow: 'Flow', privacy: 'Privacy', faq: 'FAQ', contact: 'Contact' };
+  const JP = { top: 'トップ', service: 'こんな録音に', price: '料金・無料お試し', flow: 'ご依頼の流れ', privacy: '守秘とデータ', faq: 'よくある質問', contact: 'お問い合わせ' };
+  const views = [...document.querySelectorAll('[data-view]')];
+  const wipe = document.getElementById('wipe'), menu = document.getElementById('menu'), mbtn = document.getElementById('menubtn');
+  let cur = null, busy = false, pending = null, focusT = 0;
+  function target(id) {
+    const el = id ? document.getElementById(id) : null;
+    const host = el && el.closest('[data-view]');
+    return host ? { v: host.dataset.view, el } : { v: 'top', el: null };
+  }
+  function apply(v, el) {
+    views.forEach(x => x.hidden = x.dataset.view !== v);
+    cur = v;
+    document.querySelectorAll('.topbar nav a, .menu nav a').forEach(a => a.classList.toggle('on', target(a.getAttribute('href').slice(1)).v === v));
+    const first = views.find(x => x.dataset.view === v);
+    if (el && el !== first) el.scrollIntoView(); else scrollTo(0, 0);
+    const nx = ORDER[(ORDER.indexOf(v) + 1) % ORDER.length];
+    const nv = document.getElementById('nextv');
+    nv.setAttribute('href', '#' + nx);
+    document.getElementById('nv-en').textContent = EN[nx];
+    document.getElementById('nv-jp').textContent = JP[nx];
+    dispatchEvent(new Event('resize'));
+    onScroll();
+  }
+  function go(id, push) {
+    const { v, el } = target(id);
+    if (push) { try { history.pushState(null, '', '#' + (id || 'top')); } catch (e) {} }
+    if (v === cur) { if (el && el !== views.find(x => x.dataset.view === v)) el.scrollIntoView({ behavior: RM ? 'auto' : 'smooth' }); else scrollTo({ top: 0, behavior: RM ? 'auto' : 'smooth' }); return; }
+    if (RM) return apply(v, el);
+    pending = { v, el };            // 切り替え中に押されたら、最後に押したページだけを出す
+    if (busy) return;
+    busy = true;
+    wipe.classList.remove('out'); wipe.classList.add('on');
+    setTimeout(() => {
+      apply(pending.v, pending.el); pending = null;
+      wipe.classList.add('out');
+      setTimeout(() => { wipe.classList.remove('on', 'out'); busy = false; }, 820);
+    }, 820);
+  }
+  function openMenu(open) {
+    mbtn.setAttribute('aria-expanded', open);
+    document.getElementById('menulbl').textContent = open ? 'CLOSE' : 'MENU';
+    document.documentElement.classList.toggle('menu-open', open);
+    clearTimeout(focusT);
+    // メニューを開いている間は、後ろのページを操作できないようにする
+    document.querySelectorAll('[data-view], #nextv, footer').forEach(x => x.inert = open);
+    if (open) { menu.hidden = false; requestAnimationFrame(() => requestAnimationFrame(() => menu.classList.add('open'))); focusT = setTimeout(() => menu.querySelector('nav a').focus({ preventScroll: true }), 350); }
+    else { menu.classList.remove('open'); setTimeout(() => { if (!menu.classList.contains('open')) menu.hidden = true; }, 750); }
+  }
+  mbtn.addEventListener('click', () => openMenu(mbtn.getAttribute('aria-expanded') !== 'true'));
+  addEventListener('keydown', e => { if (e.key === 'Escape' && mbtn.getAttribute('aria-expanded') === 'true') { openMenu(false); mbtn.focus(); } });
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const id = a.getAttribute('href').slice(1);
+    if (!id || !document.getElementById(id)) return;
+    e.preventDefault();
+    const wasOpen = mbtn.getAttribute('aria-expanded') === 'true';
+    if (wasOpen) openMenu(false);
+    setTimeout(() => go(id, true), wasOpen ? 250 : 0);
+  });
+  addEventListener('popstate', () => go(location.hash.slice(1), false));
+  apply(target(location.hash.slice(1)).v, target(location.hash.slice(1)).el);
+
+  /* メールアドレスは表示時に組み立てる（機械に集められにくくする） */
+  document.querySelectorAll('.mail[data-u]').forEach(el => { el.textContent = el.dataset.u + '@' + el.dataset.d; });
+
+  /* form：入力を確認してから ssgform へ送る（送信後は #sent に戻る） */
+  const form = document.getElementById('form'), fmsg = document.getElementById('fmsg');
+  form.addEventListener('submit', e => {
+    const mail = document.getElementById('f-mail');
+    let err = '';
+    if (!mail.value || !mail.checkValidity()) { err = 'メールアドレスを入力してください。返信に使います。'; mail.focus(); }
+    else if (!document.getElementById('f-legal').checked || !document.getElementById('f-terms').checked) err = '2つの確認にチェックを入れてください。';
+    else if (!/^https:\/\/ssgform\.com\/s\//.test(form.getAttribute('action'))) err = '（試作）送信先がまだ設定されていません。';
+    if (err) { e.preventDefault(); fmsg.textContent = err; }
+  });
+})();
+</script>
+</body>
+</html>
