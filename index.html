@@ -218,7 +218,7 @@ header.topbar{position:fixed;top:0;left:0;right:0;z-index:95;padding:calc(18px +
 .yen{font-family:var(--disp);font-variation-settings:"wdth" 80;font-weight:900;font-size:clamp(30px,4.4vw,64px);letter-spacing:-.01em;line-height:1;font-variant-numeric:tabular-nums;text-align:right;min-width:4.4ch}
 .yen small{font-size:.32em;font-family:var(--jp);font-weight:700;margin-left:4px}
 .scale{display:flex;justify-content:space-between;font:500 10px var(--mono);color:#5e5c57;padding:8px 0 0;margin-left:calc(clamp(80px,10vw,140px) + clamp(12px,3vw,40px));margin-right:calc(4.4ch + clamp(12px,3vw,40px))}
-.opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:clamp(36px,5vw,64px)}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:clamp(36px,5vw,64px)}
 .opt{background:var(--paper);padding:22px;display:grid;gap:8px;align-content:start}
 .opt .k{font:500 10.5px var(--mono);letter-spacing:.12em;color:var(--sig);text-transform:uppercase}
 .opt b{font-size:18px;font-weight:900}
@@ -503,9 +503,10 @@ footer{border-top:1px solid var(--ink);padding:clamp(40px,6vw,72px) var(--gut) 2
     <div class="scale" aria-hidden="true"><span>0</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span><span>60 min</span></div>
   </div>
   <div class="opts">
-    <div class="opt rv"><span class="k">Option</span><b>特急（24時間以内） <em>+1,000円</em></b><p>お急ぎの場合は、受け取りから24時間以内にお届けします。</p></div>
+    <div class="opt rv"><span class="k">Option</span><b>特急（24時間以内） <em>+5,000円</em></b><p>お急ぎの場合は、受け取りから24時間以内にお届けします。</p></div>
     <div class="opt rv d1"><span class="k">Option</span><b>音声処理証明書 <em>+5,000円</em></b><p>原本のハッシュ値（SHA-256）、使ったソフトと処理内容、中身を変えていないことを書面にします。</p></div>
-    <div class="opt rv d2"><span class="k">Payment</span><b>前払い・銀行振込</b><p>継続してご依頼いただく業者さまは、請求書払い（月末締め）にも対応します。</p></div>
+    <div class="opt rv d2"><span class="k">Option</span><b>文字起こし <em>1分 +300円〜</em></b><p>聞き取りやすくした音声を、文字に起こします。「えー」などを除くケバ取りは1分+300円、言いよどみまで起こす完全な逐語は1分+400円。聞き取れない箇所は「（聞き取り不能）」とし、推測で埋めません。納期は1時間の録音で5営業日ほどです。</p></div>
+    <div class="opt rv"><span class="k">Payment</span><b>前払い・銀行振込</b><p>継続してご依頼いただく業者さまは、請求書払い（月末締め）にも対応します。</p></div>
   </div>
 </section>
 
@@ -551,7 +552,7 @@ footer{border-top:1px solid var(--ink);padding:clamp(40px,6vw,72px) var(--gut) 2
     </div>
     <ul class="promises rv d1">
       <li><div><b>原本は加工しない</b><span>受け取った直後の状態を記録し、処理は別のファイルで行います。</span></div></li>
-      <li><div><b>外部のサービスに上げない</b><span>音声をクラウドの処理サービスや AI に送ることはしません。作業者1名だけが扱います。</span></div></li>
+      <li><div><b>外部のサービスに上げない</b><span>音声をクラウドの処理サービスや AI に送ることはしません。文字起こしの下書きも、パソコンの中だけで動くソフトで作ります。作業者1名だけが扱います。</span></div></li>
       <li><div><b>確認後に削除する</b><span>納品して、内容をご確認いただいたあと、お預かりした音声を削除します。</span></div></li>
       <li><div><b>秘密保持の約束を交わせる</b><span>ご希望があれば、書面で秘密保持の約束を交わします。</span></div></li>
     </ul>
@@ -577,6 +578,7 @@ footer{border-top:1px solid var(--ink);padding:clamp(40px,6vw,72px) var(--gut) 2
   <div class="faq rv"><h3>03<span>送り方と納品</span></h3><div>
     <details><summary>どんなファイルに対応していますか？</summary><div class="a">MP3・WAV・M4A など、一般的な音声ファイルと動画ファイルに対応します。</div></details>
     <details><summary>音声はどうやって送ればいいですか？</summary><div class="a">ギガファイル便などのファイル転送サービスで送ってください。郵送（USBメモリ・SDカード）でも受け付けます。原本は必ずお手元に残してください。</div></details>
+    <details><summary>文字起こしもお願いできますか？</summary><div class="a">できます。聞き取りやすくする処理をしたうえで、文字に起こします。料金は1分+300円（ケバ取り）または+400円（完全な逐語）です。聞き取れない箇所は「（聞き取り不能）」と書き、推測で埋めることはしません。雑音に声がほとんど埋もれている録音は、文字起こしをお受けできないことがあります。まず20秒の無料お試しで、聞こえ方をご確認ください。</div></details>
     <details><summary>カセットテープや MD のままでも頼めますか？</summary><div class="a">データ（音声ファイル）にしてからお送りください。テープや MD をデータにする作業はお受けしていません。データにしたあとの雑音やこもりの処理は、ほかの録音と同じ料金でお受けします。</div></details>
   </div></div>
   <div class="faq rv"><h3>04<span>お受けできないもの</span></h3><div>
@@ -627,7 +629,7 @@ footer{border-top:1px solid var(--ink);padding:clamp(40px,6vw,72px) var(--gut) 2
       <li><h3>お受けできない依頼</h3><p>次の依頼はお受けしません。</p><ul><li>違法に録音された音声の処理</li><li>重大な犯罪に関わる音声の処理</li><li>声紋鑑定・改ざんの鑑定</li><li>人を調べる、録音機器を設置するなどの調査</li><li>著作権のある音楽や放送の加工</li><li>そのほか、当方が不適切と判断した依頼</li></ul><p>依頼者は、お預かりする音声が違法に録音されたものでないことを約束するものとします。これに反して申し込まれたことが分かった場合、当方は処理を中止し、受け取った料金は返金しません。</p></li>
       <li><h3>料金と支払い</h3><p>料金は、当サイトに掲載する料金表（税込）のとおりとし、お預かりした音声の合計の長さで計算します。支払いは前払いの銀行振込とし、振込手数料は依頼者の負担とします。</p><p>継続してご依頼いただく業者さまは、別に取り決めた場合、請求書払い（月末締め）とすることができます。</p></li>
       <li><h3>納品</h3><p>標準の納期は、音声と料金の両方を受け取ってから3営業日以内です。ファイルの量や音声の状態によって前後する場合は、事前にお知らせします。</p></li>
-      <li><h3>仕上がり</h3><p>処理の結果は、元の音声の状態によって大きく変わります。当方は、処理によって音声が聞き取れるようになることを保証しません。正式なご依頼の前に、無料のお試し処理で仕上がりをご確認いただけます。このため、仕上がりを理由とする返金はお受けしません。</p></li>
+      <li><h3>仕上がり</h3><p>処理の結果は、元の音声の状態によって大きく変わります。当方は、処理によって音声が聞き取れるようになることを保証しません。正式なご依頼の前に、無料のお試し処理で仕上がりをご確認いただけます。文字起こしでは、聞き取れない箇所を「（聞き取り不能）」とし、推測で補いません。録音の状態によっては、文字起こしをお受けできない場合があります。このため、仕上がりを理由とする返金はお受けしません。</p></li>
       <li><h3>キャンセル</h3><p>作業を始める前のキャンセルは、受け取った料金の全額をお返しします。作業を始めたあとのキャンセルは、返金できません。</p></li>
       <li><h3>原本とデータの扱い</h3><p>依頼者は、お送りいただく音声の原本を、必ずご自身で保管してください。当方は原本を加工せず、処理は複製に対して行います。お預かりした音声は、納品後、依頼者の確認が済んだ時点で削除します。</p><p>送付中の破損や紛失、災害などやむを得ない事情によるデータの損失について、当方は責任を負いません。</p></li>
       <li><h3>秘密の保持</h3><p>当方は、依頼の内容とお預かりした音声を、依頼者の同意なく第三者に開示しません。ただし、法令にもとづいて開示を求められた場合は除きます。ご希望があれば、別に秘密保持の約束を書面で交わします。</p></li>
@@ -648,7 +650,7 @@ footer{border-top:1px solid var(--ink);padding:clamp(40px,6vw,72px) var(--gut) 2
     <ol class="arts">
       <li><h3>取得する情報</h3><ul><li>お名前（ニックネームでもかまいません）</li><li>メールアドレス</li><li>お問い合わせ・ご依頼の内容</li><li>お預かりする音声データ</li><li>お振込みの名義など、お支払いに必要な情報</li></ul></li>
       <li><h3>利用の目的</h3><p>取得した情報は、次の目的にだけ使います。</p><ul><li>お問い合わせへの返信、お見積もり</li><li>音声の処理と納品</li><li>料金の請求と入金の確認</li><li>トラブルへの対応</li></ul></li>
-      <li><h3>音声データの扱い</h3><p>お預かりした音声は、作業用のパソコンの中だけで扱い、クラウドの処理サービスや AI のサービスには送りません。作業は当方の作業者1名だけが行います。納品後、依頼者の確認が済んだ時点で削除します。</p></li>
+      <li><h3>音声データの扱い</h3><p>お預かりした音声は、作業用のパソコンの中だけで扱い、クラウドの処理サービスや AI のサービスには送りません。文字起こしの下書きにも、パソコンの中だけで動くソフトを使います。作業は当方の作業者1名だけが行います。納品後、依頼者の確認が済んだ時点で削除します。</p></li>
       <li><h3>第三者への提供</h3><p>ご本人の同意なく、個人情報を第三者に提供しません。ただし、法令にもとづく場合を除きます。</p></li>
       <li><h3>外部サービスの利用</h3><p>当方は、メールの送受信とサイトの運営に、レンタルサーバーの事業者のサービスを使っています。お問い合わせフォームの内容は、フォーム送信サービス（ssgform）を通じてメールで当方に届きます。このサービスは送信内容（本文）を保存しない仕組みですが、送信日時・送信元のページ・IPアドレス・ブラウザの種類は記録されます。</p></li>
       <li><h3>安全管理</h3><p>個人情報と音声データがもれたり、なくなったりしないよう、必要な対策をとります。</p></li>
@@ -675,7 +677,7 @@ footer{border-top:1px solid var(--ink);padding:clamp(40px,6vw,72px) var(--gut) 2
       <div><dt>価格以外に必要な費用</dt><dd>銀行振込の手数料。郵送で音声を送る場合の送料と、メディア（USBメモリ・SDカード）の費用。</dd></div>
       <div><dt>支払い方法</dt><dd>銀行振込（前払い）。継続してご依頼いただく業者さまは、請求書払い（月末締め）も可能です。</dd></div>
       <div><dt>支払いの時期</dt><dd>お見積もりを承諾いただいたあと、作業を始める前にお支払いください。</dd></div>
-      <div><dt>サービスの提供時期</dt><dd>音声と料金の両方を受け取ってから、標準で3営業日以内に納品します。ファイルの量や音声の状態によって前後します。特急（+1,000円）の場合は24時間以内です。</dd></div>
+      <div><dt>サービスの提供時期</dt><dd>音声と料金の両方を受け取ってから、標準で3営業日以内に納品します。ファイルの量や音声の状態によって前後します。特急（+5,000円）の場合は24時間以内です。文字起こしを付ける場合は、1時間の録音で5営業日ほどです。</dd></div>
       <div><dt>キャンセル・返金</dt><dd>作業を始める前のキャンセルは全額を返金します。作業を始めたあとのキャンセル、および仕上がりを理由とする返金はお受けしていません（正式なご依頼の前に、無料のお試し処理で仕上がりをご確認いただけます）。</dd></div>
     </dl>
   </div>
