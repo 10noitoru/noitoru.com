@@ -331,7 +331,11 @@ details[open] .a{animation:fade .5s ease}
 .estimate .send{margin-top:var(--space-6);text-align:left;line-height:1.7}
 .estimate .send:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .estimate-error{color:#a12514;font-weight:700;line-height:1.8}
-@media(max-width:860px){.estimate-layout{grid-template-columns:minmax(0,1fr)}}
+.estimate-bar{display:none}
+@media(max-width:860px){.estimate-layout{grid-template-columns:minmax(0,1fr)}
+  .estimate-bar{display:flex;justify-content:space-between;align-items:baseline;gap:var(--space-3);position:sticky;bottom:0;z-index:2;margin:0 calc(-1 * var(--space-card));padding:var(--space-3) var(--space-card) calc(var(--space-3) + env(safe-area-inset-bottom));background:var(--ink);color:var(--paper);font-weight:700;font-size:13px}
+  .estimate-bar b{font:900 24px/1.2 var(--disp);color:var(--paper)}
+  .estimate-bar[hidden]{display:none}}
 
 /* contact */
 .contact{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:var(--space-layout);align-items:start}
@@ -563,6 +567,7 @@ footer{border-top:1px solid var(--ink);padding:var(--space-block) var(--gut) var
         <label class="estimate-check"><input id="est-cert" type="checkbox"><span>音声処理証明書</span></label>
         <div class="fld"><label for="est-tx">文字起こし</label><select id="est-tx"><option value="none">なし</option><option value="clean">ケバ取り</option><option value="verbatim">完全な逐語</option></select></div>
       </div>
+      <div class="estimate-bar" id="est-bar" aria-hidden="true"><span>合計（税込）<b id="est-bar-total"></b>円</span><span id="est-bar-deadline"></span></div>
       <div>
         <div class="estimate-result" id="est-result" aria-live="polite" aria-atomic="true">
           <dl>
@@ -1221,6 +1226,7 @@ footer{border-top:1px solid var(--ink);padding:var(--space-block) var(--gut) var
     estMin.setAttribute('aria-invalid', String(!valid));
     document.getElementById('est-error').hidden = valid;
     document.getElementById('est-result').hidden = !valid;
+    document.getElementById('est-bar').hidden = !valid;
     estRequest.disabled = !valid;
     if (!valid) return;
     estRange.value = estMin.value;
@@ -1231,6 +1237,8 @@ footer{border-top:1px solid var(--ink);padding:var(--space-block) var(--gut) var
     }
     document.getElementById('est-total').textContent = result.total.toLocaleString('ja-JP');
     document.getElementById('est-deadline').textContent = result.deadline;
+    document.getElementById('est-bar-total').textContent = result.total.toLocaleString('ja-JP');
+    document.getElementById('est-bar-deadline').textContent = result.deadline;
     return result;
   }
   estRange.addEventListener('input', () => { estMin.value = estRange.value; updateEstimate(); });
