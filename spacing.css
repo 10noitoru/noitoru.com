@@ -1,0 +1,18 @@
+/* トップ・検索用ページ共通。本文の余白はこのスケールから選ぶ。 */
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-section: clamp(64px, 8vw, 128px);
+  --space-block: clamp(32px, 5vw, 64px);
+  --space-layout: clamp(24px, 4vw, 64px);
+  --space-card: clamp(16px, 2vw, 24px);
+  --space-nav: clamp(16px, 2.4vw, 32px);
+  --space-column: clamp(12px, 3vw, 32px);
+  --space-hero-end: clamp(16px, 3vh, 32px);
+}
