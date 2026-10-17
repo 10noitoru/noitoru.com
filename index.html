@@ -302,6 +302,37 @@ details[open] .a{animation:fade .5s ease}
 .refuse li{font-size:13px;font-weight:800;padding:var(--space-2) var(--space-4);border:1.5px solid var(--ink);border-radius:99px}
 .refuse li.ok{border-color:var(--sig);color:var(--sig)}
 
+/* 料金の目安 */
+.estimate{margin-top:var(--space-block);padding:var(--space-card);border:1px solid var(--ink)}
+.estimate h3{font-size:clamp(24px,3vw,36px);line-height:1.4;margin-bottom:var(--space-8)}
+.estimate h3 small{display:block;font:500 11px var(--mono);letter-spacing:.14em;color:var(--sig);margin-bottom:var(--space-2)}
+.estimate-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--space-layout);align-items:start}
+.estimate-inputs{display:grid;gap:var(--space-6)}
+.estimate fieldset{min-width:0;border:0;display:grid;gap:var(--space-4)}
+.estimate legend{font-weight:900;margin-bottom:var(--space-4)}
+.estimate label{font-weight:700}
+.estimate-number{display:flex;gap:var(--space-2);align-items:center}
+.estimate input[type="number"],.estimate select{width:100%;min-width:0;padding:var(--space-3);border:1px solid var(--ink);border-radius:0;background:var(--paper);font:700 16px var(--jp);color:var(--ink)}
+.estimate input[type="number"]{max-width:10em}
+.estimate input[type="range"]{width:100%;accent-color:var(--sig)}
+.estimate .estimate-check{display:flex;align-items:baseline;gap:var(--space-3)}
+.estimate input[type="checkbox"]{accent-color:var(--sig);flex:none}
+.estimate input:focus-visible,.estimate select:focus-visible,.estimate button:focus-visible{outline:2px solid var(--sig);outline-offset:3px}
+.estimate input:disabled{cursor:not-allowed}
+.estimate .estimate-check:has(input:disabled){color:#5e5c57}
+.estimate-result{border-top:2px solid var(--ink);padding-top:var(--space-4)}
+.estimate-result dl>div{display:flex;justify-content:space-between;gap:var(--space-4);padding:var(--space-3) 0;border-bottom:1px solid var(--rule);font-size:14px}
+.estimate-result dd{font-weight:900;white-space:nowrap}
+.estimate-total{margin-top:var(--space-6);font-weight:900}
+.estimate-total strong{display:block;font:900 clamp(36px,5vw,64px)/1.2 var(--disp);color:var(--sig);overflow-wrap:anywhere}
+.estimate-total strong small{font:700 16px var(--jp);margin-left:var(--space-2)}
+.estimate-deadline{margin-top:var(--space-4);font-weight:700;line-height:1.8}
+.estimate-note{font-size:13px;line-height:1.8;margin-top:var(--space-6)}
+.estimate .send{margin-top:var(--space-6);text-align:left;line-height:1.7}
+.estimate .send:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.estimate-error{color:#a12514;font-weight:700;line-height:1.8}
+@media(max-width:860px){.estimate-layout{grid-template-columns:minmax(0,1fr)}}
+
 /* contact */
 .contact{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:var(--space-layout);align-items:start}
 .contact .sec-head{grid-template-columns:1fr;margin:0}
@@ -366,6 +397,7 @@ footer{border-top:1px solid var(--ink);padding:var(--space-block) var(--gut) var
   .ctl{flex-direction:row;justify-content:space-between;align-items:center}
   .hero{grid-template-rows:auto auto auto minmax(170px,1fr) auto}
 }
+@media (max-width:380px){.logo small{display:none}}
 @media (hover:none){.cur{display:none}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.word .in,h1 .ln>span{transform:none}}
 </style>
@@ -514,6 +546,38 @@ footer{border-top:1px solid var(--ink);padding:var(--space-block) var(--gut) var
     <div class="opt rv d1"><span class="k">Option</span><b>音声処理証明書 <em>+5,000円</em></b><p>原本のハッシュ値（SHA-256）、使ったソフトと処理内容、中身を変えていないことを書面にします。</p></div>
     <div class="opt rv d2"><span class="k">Option</span><b>文字起こし <em>1分 +300円〜</em></b><p>聞き取りやすくした音声を、文字に起こします。「えー」などを除くケバ取りは1分+300円、言いよどみまで起こす完全な逐語は1分+400円。聞き取れない箇所は「（聞き取り不能）」とし、推測で埋めません。納期は1時間の録音で5営業日ほどです。</p></div>
     <div class="opt rv"><span class="k">Payment</span><b>前払い・銀行振込／カード</b><p>銀行振込か、クレジットカード（メールでお送りする支払いリンクから）でお支払いいただけます。継続してご依頼いただく業者さまは、請求書払い（月末締め）にも対応します。</p></div>
+  </div>
+  <div class="estimate" id="estimate" hidden>
+    <h3><small>ESTIMATE</small>料金の目安を出す</h3>
+    <div class="estimate-layout">
+      <div class="estimate-inputs">
+        <fieldset><legend>合計の長さ（1〜600分）</legend>
+          <label for="est-min">分数を入力</label>
+          <div class="estimate-number"><input id="est-min" type="number" min="1" max="600" step="1" value="10" inputmode="numeric" aria-describedby="est-error"><span>分</span></div>
+          <label for="est-range">スライダーで選ぶ</label>
+          <input id="est-range" type="range" min="1" max="600" step="1" value="10">
+          <p class="estimate-error" id="est-error" aria-live="polite" hidden>1〜600の整数を入力してください。</p>
+        </fieldset>
+        <label class="estimate-check"><input id="est-rush" type="checkbox" aria-describedby="est-rush-note"><span>特急（24時間以内）</span></label>
+        <p class="note" id="est-rush-note" hidden>文字起こし付きの特急はご相談ください</p>
+        <label class="estimate-check"><input id="est-cert" type="checkbox"><span>音声処理証明書</span></label>
+        <div class="fld"><label for="est-tx">文字起こし</label><select id="est-tx"><option value="none">なし</option><option value="clean">ケバ取り</option><option value="verbatim">完全な逐語</option></select></div>
+      </div>
+      <div>
+        <div class="estimate-result" id="est-result" aria-live="polite" aria-atomic="true">
+          <dl>
+            <div><dt>基本</dt><dd id="est-base"></dd></div>
+            <div id="est-rush-row" hidden><dt>特急</dt><dd id="est-rush-price"></dd></div>
+            <div id="est-cert-row" hidden><dt>音声処理証明書</dt><dd id="est-cert-price"></dd></div>
+            <div id="est-tx-row" hidden><dt>文字起こし</dt><dd id="est-tx-price"></dd></div>
+          </dl>
+          <p class="estimate-total">合計（税込）<strong><span id="est-total"></span><small>円</small></strong></p>
+          <p class="estimate-deadline">納期の目安：<span id="est-deadline"></span></p>
+        </div>
+        <p class="estimate-note">目安です。正式な金額は、録音を聞いてからお見積もりでお伝えします。表示はすべて税込です。</p>
+        <button class="send" id="est-request" type="button">この内容で見積もりを依頼する →</button>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1128,6 +1192,75 @@ footer{border-top:1px solid var(--ink);padding:var(--space-block) var(--gut) var
   });
   addEventListener('popstate', () => go(location.hash.slice(1), false));
   apply(target(location.hash.slice(1)).v, target(location.hash.slice(1)).el);
+
+  /* estimate-calculation */
+  // 経営/料金表.md と同じ値（税込）。
+  const ESTIMATE_PRICES = Object.freeze({short:5000, medium:15000, hour:20000, extra:5000, rush:5000, cert:5000, clean:300, verbatim:400});
+  function estimate(min, {rush = false, cert = false, tx = 'none'} = {}) {
+    if (!Number.isInteger(min) || min < 1 || min > 600) throw new RangeError('1〜600の整数を指定してください');
+    if (!['none', 'clean', 'verbatim'].includes(tx)) throw new RangeError('文字起こしの種類が不正です');
+    const p = ESTIMATE_PRICES;
+    const base = min <= 10 ? p.short : min <= 30 ? p.medium : p.hour + Math.ceil(Math.max(0, min - 60) / 30) * p.extra;
+    const rushPrice = rush && tx === 'none' ? p.rush : 0;
+    const certPrice = cert ? p.cert : 0;
+    const transcription = tx === 'none' ? 0 : min * p[tx];
+    return {base, rush: rushPrice, cert: certPrice, transcription, total:base + rushPrice + certPrice + transcription,
+      deadline:tx !== 'none' ? '1時間の録音で5営業日ほど' : rushPrice ? '24時間以内' : '標準 3営業日'};
+  }
+  /* estimate-ui */
+  const estMin = document.getElementById('est-min'), estRange = document.getElementById('est-range');
+  const estRush = document.getElementById('est-rush'), estCert = document.getElementById('est-cert'), estTx = document.getElementById('est-tx');
+  const estRequest = document.getElementById('est-request');
+  const yenText = value => value.toLocaleString('ja-JP') + '円';
+  function updateEstimate() {
+    const hasTx = estTx.value !== 'none';
+    if (hasTx) estRush.checked = false;
+    estRush.disabled = hasTx;
+    document.getElementById('est-rush-note').hidden = !hasTx;
+    const valid = estMin.value !== '' && estMin.checkValidity();
+    estMin.setAttribute('aria-invalid', String(!valid));
+    document.getElementById('est-error').hidden = valid;
+    document.getElementById('est-result').hidden = !valid;
+    estRequest.disabled = !valid;
+    if (!valid) return;
+    estRange.value = estMin.value;
+    const result = estimate(Number(estMin.value), {rush:estRush.checked, cert:estCert.checked, tx:estTx.value});
+    for (const [key, value] of [['base',result.base], ['rush',result.rush], ['cert',result.cert], ['tx',result.transcription]]) {
+      document.getElementById('est-' + (key === 'base' ? 'base' : key + '-price')).textContent = yenText(value);
+      if (key !== 'base') document.getElementById('est-' + key + '-row').hidden = value === 0;
+    }
+    document.getElementById('est-total').textContent = result.total.toLocaleString('ja-JP');
+    document.getElementById('est-deadline').textContent = result.deadline;
+    return result;
+  }
+  estRange.addEventListener('input', () => { estMin.value = estRange.value; updateEstimate(); });
+  estMin.addEventListener('input', updateEstimate);
+  [estRush, estCert, estTx].forEach(input => input.addEventListener('change', updateEstimate));
+  estRequest.addEventListener('click', () => {
+    const result = updateEstimate();
+    if (!result) return;
+    const min = Number(estMin.value), options = [];
+    if (result.rush) options.push('特急');
+    if (result.cert) options.push('音声処理証明書');
+    if (estTx.value !== 'none') options.push('文字起こし（' + (estTx.value === 'clean' ? 'ケバ取り' : '完全な逐語') + '）');
+    document.getElementById('f-type').value = 'お見積もり';
+    document.getElementById('f-len').value = min <= 10 ? '〜10分' : min <= 30 ? '〜30分' : min <= 60 ? '〜60分' : '60分超';
+    const message = document.getElementById('f-msg');
+    if (!message.value) message.value = '【料金の目安】合計' + min + '分／オプション：' + (options.join('・') || 'なし') + '／目安 ' + yenText(result.total) + '（税込）\n\n';
+    go('contact', true);
+    const focusStarted = performance.now();
+    function focusRequestMessage() {
+      if (location.hash !== '#contact') return;
+      if (!document.getElementById('contact').hidden) {
+        if (document.activeElement === estRequest || document.activeElement === document.body) message.focus({preventScroll:true});
+        return;
+      }
+      if (performance.now() - focusStarted < 3000) requestAnimationFrame(focusRequestMessage);
+    }
+    requestAnimationFrame(focusRequestMessage);
+  });
+  document.getElementById('estimate').hidden = false;
+  updateEstimate();
 
   /* メールアドレスは表示時に組み立てる（機械に集められにくくする） */
   document.querySelectorAll('.mail[data-u]').forEach(el => { el.textContent = el.dataset.u + '@' + el.dataset.d; });
